@@ -1,0 +1,13 @@
+citHeader("Please cite stargazer in publications as:")
+
+citEntry(
+  entry="Manual",
+  title = "ExtremeBounds: Extreme Bounds Analysis in R",
+  author = as.person("Marek Hlavac"),
+  year = "2014",
+  note = "R package version 0.1.2",
+  organization = "Harvard University",
+  address = "Cambridge, USA",
+  textVersion = "Hlavac, Marek (2014). ExtremeBounds: Extreme Bounds Analysis in R. R package version 0.1.2. http://CRAN.R-project.org/package=ExtremeBounds",
+  url = "http://CRAN.R-project.org/package=ExtremeBounds"
+)
