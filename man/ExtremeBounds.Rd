@@ -20,7 +20,7 @@ Harvard University, Political Economy and Government \cr
 }
 \section{Please cite as:}{
 Hlavac, Marek (2014). ExtremeBounds: Extreme Bounds Analysis in R.\cr
-R package version 0.1.2. http://CRAN.R-project.org/package=ExtremeBounds 
+R package version 0.1.3. http://CRAN.R-project.org/package=ExtremeBounds 
 }
 \seealso{
 \code{\link{eba}}, \code{\link{hist.eba}}, \code{\link{print.eba}}

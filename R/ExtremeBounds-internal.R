@@ -11,7 +11,7 @@
 function(libname, pkgname) {
   packageStartupMessage("\nPlease cite as: \n")
   packageStartupMessage(" Hlavac, Marek (2014). ExtremeBounds: Extreme Bounds Analysis in R.")
-  packageStartupMessage(" R package version 0.1.2. http://CRAN.R-project.org/package=ExtremeBounds \n")
+  packageStartupMessage(" R package version 0.1.3. http://CRAN.R-project.org/package=ExtremeBounds \n")
 }
 
 
@@ -132,6 +132,7 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
       out <- out[which.rows,]
     }
     
+    if (is.null(nrow(out))) { out <- as.matrix(t(out)) }
     nreg <- nrow(out)
     
     out.list <- list(out, ncomb, nreg)
@@ -153,18 +154,41 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
   get.median <-
   function(x) {
     x <- x[!is.na(x)] # remove NAs
-    median <- median(x)
-    median.lower <- max(x[x<=median]) 
-    median.higher <- min(x[x>=median])
+    if (length(x) != 0) {
+      median <- median(x)
+      median.lower <- max(x[x<=median]) 
+      median.higher <- min(x[x>=median])
+    }
+    else {
+      median <- median.lower <- median.higher <- NA
+    }
   
     out <- c(median.lower, median, median.higher)
     names(out) <- c("median.lower","median","median.higher")
     return(out)
   }
   
+  # mean wrapper that returns NA instead of NaN
+  get.mean <-
+  function(...) {
+    value <- do.call(mean, list(...))
+    if (!is.nan(value)) { return(value) }
+    else { return(NA) }
+  }
+  
+  # mean wrapper that returns NA instead of NaN
+  get.weighted.mean <-
+  function(...) {
+    value <- do.call(weighted.mean, list(...))
+    if (!is.nan(value)) { return(value) }
+    else { return(NA) }
+  }
+  
   # population standard deviation
   stdev <-
   function(x) {
+    if (length(x[!is.na(x)]) == 0) { return(NA) }
+    
     N <- length(x)
     stdev <- sqrt((N-1)/N) * sd(x, na.rm=TRUE)
     return(stdev)
@@ -521,12 +545,11 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
           }
           else { replacement <- r[[replaced]][(r$include[,i]==TRUE),i] }
             
-          r.adj[[replaced]] <- replacement
-          
           if (length(replacement) == 0) {
-            message("\n Too few observations remain in the analysis.\n Check if conditions in arguments 'draws', 'vif' and 'include.fun' might be too stringent.")
-            return(NULL)
+            replacement <- NA
           }
+          
+          r.adj[[replaced]] <- replacement
         }
         
         # get some info for Sala-i-Martin's EBA
@@ -538,11 +561,19 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
           number.not.significant <- length( r.adj$beta[(r.adj$ci.lower <= variable.mu) & (r.adj$ci.upper >= variable.mu) & (!is.na(r.adj$beta))] )
           beta.significant[i] <- (total.length - number.not.significant)/total.length
           
+          if (is.nan(beta.significant[i])) { beta.significant[i] <- NA }
+          
           beta.below.mu[i] <- length(r.adj$beta[(r.adj$beta < variable.mu) & (!is.na(r.adj$beta))]) / total.length
           beta.above.mu[i] <- length(r.adj$beta[(r.adj$beta > variable.mu) & (!is.na(r.adj$beta))]) / total.length
           
+          if (is.nan(beta.below.mu[i])) { beta.below.mu[i] <- NA }
+          if (is.nan(beta.above.mu[i])) { beta.above.mu[i] <- NA }
+          
           beta.significant.below.mu[i] <- length(r.adj$beta[(r.adj$beta < variable.mu) & (r.adj$ci.upper < variable.mu) & (!is.na(r.adj$beta))]) / total.length
           beta.significant.above.mu[i] <- length(r.adj$beta[(r.adj$beta > variable.mu) & (r.adj$ci.lower > variable.mu) & (!is.na(r.adj$beta))]) / total.length
+          
+          if (is.nan(beta.significant.below.mu[i])) { beta.significant.below.mu[i] <- NA }
+          if (is.nan(beta.significant.above.mu[i])) { beta.significant.above.mu[i] <- NA }
           
           nreg.variable[i] <- num.regs
           ncoef.variable[i] <- total.length
@@ -568,39 +599,50 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
 
         if (!(pt %in% c("mean","weighted.mean","cdf.generic.unweighted","cdf.generic.weighted"))) {
           if (length(index) == 0) {
-            message("\n Too few observations remain in the analysis.\n Check if conditions in arguments 'draws', 'vif' and 'include.fun' might be too stringent.")
-            return(NULL)
+            beta[variable.label, pt] <- NA
+            se[variable.label, pt] <- NA
+            var[variable.label, pt] <- NA
+            t[variable.label, pt] <- NA
+            p[variable.label, pt] <- NA
+            ci.lower[variable.label, pt] <- NA
+            ci.upper[variable.label, pt] <- NA
+            vif[variable.label, pt] <- NA
+            nobs[variable.label, pt] <- NA
+            formula[variable.label, pt] <- NA
+            weight[variable.label, pt] <- NA
+            cdf.mu.generic[variable.label, pt] <- NA
           }
-          
-          beta[variable.label, pt] <- r.adj$beta[index]
-          se[variable.label, pt] <- r.adj$se[index]
-          var[variable.label, pt] <- r.adj$var[index]
-          t[variable.label, pt] <- r.adj$t[index]
-          p[variable.label, pt] <- r.adj$p[index]
-          ci.lower[variable.label, pt] <- r.adj$ci.lower[index]
-          ci.upper[variable.label, pt] <- r.adj$ci.upper[index]
-          vif[variable.label, pt] <- r.adj$vif[index]
-          nobs[variable.label, pt] <- r.adj$nobs[index]
-          formula[variable.label, pt] <- r.adj$formula[index]
-          weight[variable.label, pt] <- r.adj$weight[index]
-          cdf.mu.generic[variable.label, pt] <- r.adj$cdf.mu.generic[index]
+          else {
+            beta[variable.label, pt] <- r.adj$beta[index]
+            se[variable.label, pt] <- r.adj$se[index]
+            var[variable.label, pt] <- r.adj$var[index]
+            t[variable.label, pt] <- r.adj$t[index]
+            p[variable.label, pt] <- r.adj$p[index]
+            ci.lower[variable.label, pt] <- r.adj$ci.lower[index]
+            ci.upper[variable.label, pt] <- r.adj$ci.upper[index]
+            vif[variable.label, pt] <- r.adj$vif[index]
+            nobs[variable.label, pt] <- r.adj$nobs[index]
+            formula[variable.label, pt] <- r.adj$formula[index]
+            weight[variable.label, pt] <- r.adj$weight[index]
+            cdf.mu.generic[variable.label, pt] <- r.adj$cdf.mu.generic[index]
+          }
         }
         # get means
         else if (pt == "mean") {  # unweighted mean
-            beta[variable.label, pt] <- mean(r.adj$beta, na.rm=TRUE)
-            se[variable.label, pt] <- mean(r.adj$se, na.rm=TRUE)
-            var[variable.label, pt] <- mean(r.adj$var, na.rm=TRUE)
+            beta[variable.label, pt] <- get.mean(r.adj$beta, na.rm=TRUE)
+            se[variable.label, pt] <- get.mean(r.adj$se, na.rm=TRUE)
+            var[variable.label, pt] <- get.mean(r.adj$var, na.rm=TRUE)
         }
         else if (pt == "weighted.mean") { # weighted mean
-            beta[variable.label, pt] <- weighted.mean(x = r.adj$beta, w = r.adj$weight, na.rm=TRUE)
-            se[variable.label, pt] <- weighted.mean(x = r.adj$se, w = r.adj$weight, na.rm=TRUE)
-            var[variable.label, pt] <- weighted.mean(x = r.adj$var, w = r.adj$weight, na.rm=TRUE)
+            beta[variable.label, pt] <- get.weighted.mean(x = r.adj$beta, w = r.adj$weight, na.rm=TRUE)
+            se[variable.label, pt] <- get.weighted.mean(x = r.adj$se, w = r.adj$weight, na.rm=TRUE)
+            var[variable.label, pt] <- get.weighted.mean(x = r.adj$var, w = r.adj$weight, na.rm=TRUE)
         }
         else if (pt == "cdf.generic.unweighted") {  # unweighted mean of CDF(mu)
-            cdf.mu.generic[variable.label, pt] <- mean(r.adj$cdf.mu.generic, na.rm=TRUE)
+            cdf.mu.generic[variable.label, pt] <- get.mean(r.adj$cdf.mu.generic, na.rm=TRUE)
         }
         else if (pt == "cdf.generic.weighted") {  # weighted mean of CDF(mu)
-            cdf.mu.generic[variable.label, pt] <- weighted.mean(x = r.adj$cdf.mu.generic, w = r.adj$weight, na.rm=TRUE)
+            cdf.mu.generic[variable.label, pt] <- get.weighted.mean(x = r.adj$cdf.mu.generic, w = r.adj$weight, na.rm=TRUE)
         }
       }
     
@@ -923,49 +965,56 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
     
     mu.value <- x$mu[var.label]
     
-    # save histogram into a list
-    histograms[[var.label]] <- h <- hist(x.values, plot=FALSE)
-    
-    if (mu.visible == TRUE) {
-    
-      min.x.value <- min(h$breaks, na.rm=TRUE)
-      max.x.value <- max(h$breaks, na.rm=TRUE)
-      
-      if (mu.value <= min.x.value) { xlim.min <- mu.value } else { xlim.min <- min.x.value }
-      if (mu.value >= max.x.value) { xlim.max <- mu.value } else { xlim.max <- max.x.value }
-      
-      xlim.use <- c(xlim.min, xlim.max)
-      if (!is.null(xlim)) { xlim.use <- xlim }
-      
-      hist(x.values,
-          col=col, freq = freq,
-          xlim=xlim.use,
-          xlab=xlab, main=print.var.label,...)
-    } else {
-      hist(x.values,
-           col=col, freq = freq,
-           xlab=xlab, main=print.var.label,...)
+    if (length(x.values[!is.na(x.values)]) == 0) { # in case there is nothing to plot
+      histograms[[var.label]] <- h <- NULL
+      names(plot(1, type="n", axes=F, xlab="", ylab="", main=print.var.label))
     }
+    else {  # usual case when there is enough to plot
     
-    if (mu.show == TRUE) {
-      abline(v = mu.value, col=mu.col, lwd=mu.lwd)
-    }
+      # save histogram into a list
+      histograms[[var.label]] <- h <- hist(x.values, plot=FALSE)
     
-    if (density.show == TRUE) {
-      density.object <- do.call(density, append(list(x=x.values), density.args))
-      lines(density.object, col=density.col, lwd=density.lwd)
-    }
+      if (mu.visible == TRUE) {
     
-    if (normal.show == TRUE) {
-      if (normal.weighted == TRUE) {
-        mu <- x$coefficients$weighted.mean[var.label,"beta"]
-        sigma <- x$coefficients$weighted.mean[var.label,"se"]
+        min.x.value <- min(h$breaks, na.rm=TRUE)
+        max.x.value <- max(h$breaks, na.rm=TRUE)
+      
+        if (mu.value <= min.x.value) { xlim.min <- mu.value } else { xlim.min <- min.x.value }
+        if (mu.value >= max.x.value) { xlim.max <- mu.value } else { xlim.max <- max.x.value }
+      
+        xlim.use <- c(xlim.min, xlim.max)
+        if (!is.null(xlim)) { xlim.use <- xlim }
+      
+        hist(x.values,
+            col=col, freq = freq,
+            xlim=xlim.use,
+            xlab=xlab, main=print.var.label,...)
+      } else {
+        hist(x.values,
+            col=col, freq = freq,
+            xlab=xlab, main=print.var.label,...)
       }
-      else {
-        mu <- x$coefficients$mean[var.label,"beta"]
-        sigma <- x$coefficients$mean[var.label,"se"]
+    
+      if (mu.show == TRUE) {
+        abline(v = mu.value, col=mu.col, lwd=mu.lwd)
       }
-      curve(dnorm(x, mean=mu, sd=sigma), col=normal.col, lwd=normal.lwd, add=TRUE)
+    
+      if (density.show == TRUE) {
+        density.object <- do.call(density, append(list(x=x.values), density.args))
+        lines(density.object, col=density.col, lwd=density.lwd)
+      }
+    
+      if (normal.show == TRUE) {
+        if (normal.weighted == TRUE) {
+          mu <- x$coefficients$weighted.mean[var.label,"beta"]
+          sigma <- x$coefficients$weighted.mean[var.label,"se"]
+        }
+        else {
+          mu <- x$coefficients$mean[var.label,"beta"]
+          sigma <- x$coefficients$mean[var.label,"se"]
+        }
+        curve(dnorm(x, mean=mu, sd=sigma), col=normal.col, lwd=normal.lwd, add=TRUE)
+      }
     }
   }
   
