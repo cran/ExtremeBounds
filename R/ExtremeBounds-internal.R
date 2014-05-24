@@ -11,7 +11,7 @@
 function(libname, pkgname) {
   packageStartupMessage("\nPlease cite as: \n")
   packageStartupMessage(" Hlavac, Marek (2014). ExtremeBounds: Extreme Bounds Analysis in R.")
-  packageStartupMessage(" R package version 0.1.3. http://CRAN.R-project.org/package=ExtremeBounds \n")
+  packageStartupMessage(" R package version 0.1.4.1. http://CRAN.R-project.org/package=ExtremeBounds \n")
 }
 
 
@@ -35,8 +35,10 @@ function(beta.vector, se.vector, level) {
 
 .ev <-
 function(string.vector) {
-    
+  
+  if (!is.character(string.vector)) { return(NULL) }
   if (is.null(string.vector)) { return(NULL) }
+  
     
   out.vector <- c()
     
@@ -65,7 +67,7 @@ function(string.vector) {
 
 ################################## EBA ##################################
 .eba.wrap <-
-function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, reg.fun, se.fun, include.fun, weights, cl, ...) {
+function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, reg.fun, se.fun, include.fun, weights, cl, ...) {
   
   is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  {
     if (!is.numeric(x)) { return(FALSE) }
@@ -343,7 +345,7 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
     
     return(temp.vif)
   }
-  
+
   weights.lri <- 
   function(model.object, reg.fun, ...) {
     model.data <- model.frame(model.object)
@@ -715,7 +717,45 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
     message("Done.")
     return(out)
   } 
+  
+  # returns string without leading or trailing whitespace
+  trim <- function (x) gsub("^\\s+|\\s+$", "", x)
+  
+  # strsplit, but ignore anything inside brackets ( )
+  str.split.outermost <-
+  function(s, split.char) {
     
+    inside.brackets <- 0
+    all.splits <- c()
+    current.split <- ""
+    
+    for (i in 1:nchar(s)) {
+      c <- substr(s, i, i)  # current character
+      if (c == "(") { inside.brackets <- inside.brackets + 1 }
+      if (c == ")") { inside.brackets <- inside.brackets - 1 }
+      
+      if ((c == split.char) && (inside.brackets == 0)) {
+        all.splits <- c(all.splits, current.split)
+        current.split <- ""
+      }
+      else {
+        current.split <- paste(current.split, c, sep = "")
+      }
+    }
+    
+    # add whatever remains
+    if ((c != split.char) && (inside.brackets == 0)) {
+      all.splits <- c(all.splits, current.split)
+    }
+    
+    return(all.splits)
+  }
+  
+  get.formula.term.labels <-
+    function(Formula.object, rhs=NULL) {
+      subformula <- gsub("~","", deparse(as.Formula(formula(Formula.object, lhs=0, rhs=rhs))), fixed=TRUE)
+      return(trim(str.split.outermost(subformula, "+")))
+    }
   
   ################################### 
   
@@ -726,11 +766,45 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
   
   # data frame
   if (!is.data.frame(data)) { error.msg <- c(error.msg,"Argument 'data' must contain a data frame.\n")}
+  
+  # there needs to be either a formula or y, free, doubtful, etc.
+  if ((!is(formula, "formula")) && (!is.null(formula))) { error.msg <- c(error.msg,"Argument 'formula' must be NULL or a formula.\n")}
+  
+  if (is(formula, "formula")) {
+      
+    formula <- as.Formula(formula)
+    
+    y <- as.character(formula)[[2]]
+    
+    # if only one RHS of formula, assume everything is focus
+    if (length(formula)[2] ==  1) {
+      free <- NULL
+      focus <- get.formula.term.labels(formula, rhs = 1)
+      doubtful <- NULL
+    }
+    else if (length(formula)[2] ==  2) {
+      free <- get.formula.term.labels(formula, rhs = 1)
+      focus <- get.formula.term.labels(formula, rhs = 2)
+      doubtful <- NULL
+    } 
+    else if (length(formula)[2] ==  3) {
+      free <- get.formula.term.labels(formula, rhs = 1)
+      focus <- get.formula.term.labels(formula, rhs = 2)
+      doubtful <- get.formula.term.labels(formula, rhs = 3)
+      doubtful <- unique(c(doubtful, focus))
+    } 
+    
+    if (length(free) == 0) { free <- NULL }
+    if (length(focus) == 0) { focus <- NULL }
+    if (length(doubtful) == 0) { doubtful <- NULL }
+      
+  }
+  
 
   # dependent variable
   if (!is.character(y)) { error.msg <- c(error.msg,"Argument 'y' must be a character string containing the name of the dependent variable.\n")}
   if (length(y)!=1)  { error.msg <- c(error.msg,"Argument 'y' must be of length 1.\n")}
-  if (is.character(y) && (length(y)==1)) {
+  if (is.character(y) && (length(.ev(y))==1)) {
     if (!(.ev(y) %in% names(data)))  { error.msg <- c(error.msg,"Variable in argument 'y' must be in the data frame.\n")}
     if ((y %in% free) || (y %in% focus) || (y %in% doubtful)) { error.msg <- c(error.msg,"Variable in argument 'y' must not be among the free/focus/doubtful variables.\n")}
   }
@@ -793,8 +867,18 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
   if ((!is.null(vif)) && (length(vif)!=1))  { error.msg <- c(error.msg,"Argument 'vif' must be of length 1.\n")}
   
   # mutually exclusive variables
-  if ((!is.list(exclusive)) && (!is.null(exclusive)))  { error.msg <- c(error.msg, "Argument 'exclusive' must be NULL or a list of string vectors.\n") }
+  if ((!is.list(exclusive)) && (!is(exclusive, "formula")) && (!is.null(exclusive)))  { error.msg <- c(error.msg, "Argument 'exclusive' must be NULL or a list of string vectors, or a Formula.\n") }
+  
+  if (is(exclusive, "formula")) {   # if given as a Formula, transform into list
+    exclusive.formula <- as.Formula(exclusive)
+    exclusive <- list()
+    for (i in 1:(length(exclusive.formula)[2])) {
+      exclusive[[i]] <- colnames(model.frame(exclusive.formula, lhs = 0, rhs = i, data = data))
+    }
+  }
+  
   if (is.list(exclusive)) {
+    
     error.exclusive.subset <- FALSE  # keeps track of which errors have already been announced
     error.exclusive.string <- FALSE
     
@@ -876,7 +960,7 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
                            mu.show, mu.col, mu.lwd, mu.visible, 
                            density.show, density.col, density.lwd, density.args, 
                            normal.show, normal.col, normal.lwd, normal.weighted, 
-                           xlab, xlim, cl, ...) {
+                           xlim, ylim, cl, ...) {
   
   # what dimensions should we have for histogram display
   get.dimensions <- function(n) {
@@ -924,9 +1008,6 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
   if (!is.logical(normal.weighted)) { error.msg <- c(error.msg, "Argument 'normal.weighted' must be of type 'logical' (TRUE/FALSE).\n")}   
   if (length(normal.weighted)!=1) { error.msg <- c(error.msg, "Argument 'normal.weighted' must be of length 1.\n")}   
   
-  if (!is.character(xlab)) { error.msg <- c(error.msg, "Argument 'xlab' must be a character string.\n")}   
-  if (length(xlab)!=1) { error.msg <- c(error.msg, "Argument 'xlab' must be of length 1.\n")}   
-  
   if (!is.null(error.msg)) {
     message(error.msg) 
     return(NULL)
@@ -948,7 +1029,7 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
   how.many.variables <- length(variables)
   
   dimensions <- get.dimensions(how.many.variables)
-  par(mfrow=c(dimensions["nrows"], dimensions["ncols"]))
+  par(mfrow=c(dimensions["nrows"], dimensions["ncols"]), mar=c(2,2,2,2))
   
   histograms <- list()
   
@@ -973,6 +1054,33 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
     
       # save histogram into a list
       histograms[[var.label]] <- h <- hist(x.values, plot=FALSE)
+      
+      # get default ylim that prevents cutting off
+      if (freq == T) { ylim.max <- max(h$counts, na.rm=TRUE) }
+      else { ylim.max <- max(h$density, na.rm=TRUE) }
+      
+      if (density.show) {
+        density.object <- do.call(density, append(list(x=x.values), density.args))
+        ylim.max <- max(max(density.object$y), ylim.max)
+      }
+      
+      if (normal.show == TRUE) {
+        if (normal.weighted == TRUE) {
+          mu <- x$coefficients$weighted.mean[var.label,"beta"]
+          sigma <- x$coefficients$weighted.mean[var.label,"se"]
+        }
+        else {
+          mu <- x$coefficients$mean[var.label,"beta"]
+          sigma <- x$coefficients$mean[var.label,"se"]
+        }
+        normal.max <- dnorm(mu, mean=mu, sd=sigma)
+        ylim.max <- max(normal.max, ylim.max)
+      }
+      
+      ylim.use <- c(0, ylim.max)
+      if (!is.null(ylim)) { ylim.use <- ylim }
+      
+      ###
     
       if (mu.visible == TRUE) {
     
@@ -987,34 +1095,19 @@ function(data, y, free, doubtful, focus, k, mu, level, vif, exclusive, draws, re
       
         hist(x.values,
             col=col, freq = freq,
-            xlim=xlim.use,
-            xlab=xlab, main=print.var.label,...)
+            ylab = "",
+            xlim=xlim.use, ylim = ylim.use,
+            main=print.var.label,...)
       } else {
         hist(x.values,
             col=col, freq = freq,
-            xlab=xlab, main=print.var.label,...)
+             ylab = "",
+            ylim = ylim.use, main=print.var.label, ...)
       }
     
-      if (mu.show == TRUE) {
-        abline(v = mu.value, col=mu.col, lwd=mu.lwd)
-      }
-    
-      if (density.show == TRUE) {
-        density.object <- do.call(density, append(list(x=x.values), density.args))
-        lines(density.object, col=density.col, lwd=density.lwd)
-      }
-    
-      if (normal.show == TRUE) {
-        if (normal.weighted == TRUE) {
-          mu <- x$coefficients$weighted.mean[var.label,"beta"]
-          sigma <- x$coefficients$weighted.mean[var.label,"se"]
-        }
-        else {
-          mu <- x$coefficients$mean[var.label,"beta"]
-          sigma <- x$coefficients$mean[var.label,"se"]
-        }
-        curve(dnorm(x, mean=mu, sd=sigma), col=normal.col, lwd=normal.lwd, add=TRUE)
-      }
+      if (mu.show == TRUE) { abline(v = mu.value, col=mu.col, lwd=mu.lwd) }
+      if (density.show == TRUE) { lines(density.object, col=density.col, lwd=density.lwd) }
+      if (normal.show == TRUE) { curve(dnorm(x, mean=mu, sd=sigma), col=normal.col, lwd=normal.lwd, add=TRUE) }
     }
   }
   

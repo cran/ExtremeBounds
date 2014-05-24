@@ -67,7 +67,7 @@ Harvard University, Political Economy and Government \cr
 }
 \section{Please cite as:}{
 Hlavac, Marek (2014). ExtremeBounds: Extreme Bounds Analysis in R.\cr
-R package version 0.1.3. http://CRAN.R-project.org/package=ExtremeBounds 
+R package version 0.1.4.1. http://CRAN.R-project.org/package=ExtremeBounds 
 }
 \seealso{
 \code{\link{eba}}, \code{\link{hist.eba}}
@@ -76,10 +76,15 @@ R package version 0.1.3. http://CRAN.R-project.org/package=ExtremeBounds
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \examples{
-# perform Extreme Bound Analysis
-eba.results <- eba(data = mtcars[1:10, ], y = "mpg", free = "wt",
-                   doubtful = c("cyl","disp","hp","drat","qsec","vs","am","gear","carb"),
-                   focus = c("hp","gear"), k = 0:2)
+# perform Extreme Bounds Analysis
+
+eba.results <- eba(formula = mpg ~ wt | hp + gear | cyl + disp + drat + qsec + vs + am + carb,
+                   data = mtcars[1:10, ], k = 0:2)
+
+# The same result can be achieved by running:
+# eba.results <- eba(data = mtcars[1:10, ], y = "mpg", free = "wt",
+#                    doubtful = c("cyl","disp","hp","drat","qsec","vs","am","gear","carb"),
+#                    focus = c("hp","gear"), k = 0:2)
 
 # print out results, rounded to 2 decimal places
 print(eba.results, digits = 2)

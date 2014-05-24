@@ -13,7 +13,7 @@
      mu.show = TRUE, mu.col = "red", mu.lwd = 2, mu.visible = TRUE,
      density.show = TRUE, density.col = "blue", density.lwd = 2, density.args = NULL, 
      normal.show = FALSE, normal.col = "darkgreen", normal.lwd = 2, 
-     normal.weighted = FALSE, xlab = "regression coefficient", xlim = NULL, ...) 
+     normal.weighted = FALSE, xlim = NULL, ylim = NULL, ...) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -34,8 +34,8 @@
   \item{normal.col}{a color to be used to draw the normal distribution density curve. Default is \code{"darkgreen"}.}
   \item{normal.lwd}{the line width for the normal distribution density curve. For more detail, see the documentation for \code{lwd} in \code{\link{par}}. Default is 2.}
   \item{normal.weighted}{logical; If TRUE, the normal distribution density shown by \code{normal.show} will use the weighted mean and standard error, with each regression model's weight specified by \code{eba}'s argument \code{weights}. If FALSE (default), the unweighted mean and standard error will be used (i.e., each regression model receives equal weight).}
-  \item{xlab}{a character string that specifies a label for the horizontal axis.}
   \item{xlim}{the range of x values with sensible defaults.}
+  \item{ylim}{the range of y values with sensible defaults.}
   \item{\dots}{additional arguments that will be passed on to the \code{\link{hist}} function that creates the histograms.}
 %%     ~~Describe \code{\dots} here~~
 }
@@ -53,7 +53,7 @@ Harvard University, Political Economy and Government \cr
 }
 \section{Please cite as:}{
 Hlavac, Marek (2014). ExtremeBounds: Extreme Bounds Analysis in R.\cr
-R package version 0.1.3. http://CRAN.R-project.org/package=ExtremeBounds 
+R package version 0.1.4.1. http://CRAN.R-project.org/package=ExtremeBounds 
 }
 \seealso{
 \code{\link{density}}, \code{\link{eba}}, \code{\link{hist}}, \code{\link{print.eba}}
@@ -62,10 +62,15 @@ R package version 0.1.3. http://CRAN.R-project.org/package=ExtremeBounds
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \examples{
-# perform Extreme Bound Analysis
-eba.results <- eba(data = mtcars[1:10, ], y = "mpg", free = "wt",
-                   doubtful = c("cyl","disp","hp","drat","qsec","vs","am","gear","carb"),
-                   focus = c("hp","gear"), k = 0:2)
+# perform Extreme Bounds Analysis
+
+eba.results <- eba(formula = mpg ~ wt | hp + gear | cyl + disp + drat + qsec + vs + am + carb,
+                   data = mtcars[1:10, ], k = 0:2)
+
+# The same result can be achieved by running:
+# eba.results <- eba(data = mtcars[1:10, ], y = "mpg", free = "wt",
+#                    doubtful = c("cyl","disp","hp","drat","qsec","vs","am","gear","carb"),
+#                    focus = c("hp","gear"), k = 0:2)
 
 # create histograms, keeping the default settings
 hist(eba.results)

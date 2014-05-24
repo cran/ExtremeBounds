@@ -2,12 +2,12 @@
 # Author: Marek Hlavac
 
 eba <-
-function(data, y, free=NULL, doubtful=NULL, focus=NULL, k=0:3, mu=0, level=0.95, vif=NULL, 
+function(formula = NULL, data, y = NULL, free=NULL, doubtful=NULL, focus=NULL, k=0:3, mu=0, level=0.95, vif=NULL, 
          exclusive=NULL, draws=NULL, reg.fun=lm, se.fun=NULL, include.fun=NULL, weights=NULL, ...) {
   
   cl <- match.call()
     
-  return(.eba.wrap(data=data, y=y, free=free, doubtful=doubtful, focus=focus, 
+  return(.eba.wrap(formula=formula, data=data, y=y, free=free, doubtful=doubtful, focus=focus, 
                      k=k, mu=mu, level=level, vif=vif, exclusive=exclusive, draws=draws,
                      reg.fun=reg.fun, se.fun=se.fun, include.fun=include.fun, weights=weights, cl = cl, ...))
 }
@@ -16,7 +16,7 @@ hist.eba <- function(x, variables=NULL, col="gray", freq=FALSE, main=NULL,
                      mu.show=TRUE, mu.col="red", mu.lwd=2, mu.visible=TRUE,
                      density.show=TRUE, density.col="blue", density.lwd=2, density.args=NULL, 
                      normal.show=FALSE, normal.col="darkgreen", normal.lwd=2, normal.weighted=FALSE, 
-                     xlab="regression coefficient", xlim=NULL, ...) {
+                     xlim=NULL, ylim=NULL, ...) {
   
   cl <- match.call()
   
@@ -26,7 +26,7 @@ hist.eba <- function(x, variables=NULL, col="gray", freq=FALSE, main=NULL,
                         density.show=density.show,
                         density.col=density.col, density.lwd=density.lwd, density.args=density.args,
                         normal.show=normal.show, normal.col=normal.col, normal.lwd=normal.lwd,
-                        normal.weighted=normal.weighted, xlab=xlab, xlim=xlim, cl=cl, ...))
+                        normal.weighted=normal.weighted, xlim=xlim, ylim=ylim, cl=cl, ...))
 
 }
 

@@ -7,16 +7,16 @@
 
 %% almost as usual
 \author{Marek Hlavac\\Harvard University}
-\title{\pkg{ExtremeBounds}: Extreme Bounds Analysis in R}
+\title{\pkg{ExtremeBounds}: Extreme Bounds Analysis in \proglang{R}}
 
 %% for pretty printing and a nice hypersummary also set:
 \Plainauthor{Marek Hlavac} %% comma-separated
 \Plaintitle{ExtremeBounds: Extreme Bounds Analysis in R} %% without formatting
-\Shorttitle{\pkg{ExtremeBounds}: Extreme Bounds Analysis in R} %% a short title (if necessary)
+\Shorttitle{\pkg{ExtremeBounds}: Extreme Bounds Analysis in \proglang{R}} %% a short title (if necessary)
 
 %% an abstract and keywords
 \Abstract{
-This article introduces the \proglang{R} package \pkg{ExtremeBounds} to perform extreme bounds analysis (EBA), a sensitivity test that examines how robustly the dependent variable of a regression model is related to a variety of possible determinants. \pkg{ExtremeBounds} supports Leamer's EBA that focuses on the upper and lower extreme bounds of regression coefficients, as well as Sala-i-Martin's EBA which considers their entire distribution. In contrast to existing alternatives, it can estimate models of any size, use regression models other than Ordinary Least Squares, incorporate non-linearities in the model specification, and apply custom weights and standard errors. To alleviate concerns about the multicollinearity and conceptual overlap of examined variables, \pkg{ExtremeBounds} allows users to specify sets of mutually exclusive variables, and can restrict the analysis to coefficients from regression models that yield a variance inflation factor (VIF) within a pre-specified limit.
+This article introduces the \proglang{R} package \pkg{ExtremeBounds} to perform extreme bounds analysis (EBA), a sensitivity test that examines how robustly the dependent variable of a regression model is related to a variety of possible determinants. \pkg{ExtremeBounds} supports Leamer's EBA that focuses on the upper and lower extreme bounds of regression coefficients, as well as Sala-i-Martin's EBA which considers their entire distribution. In contrast to existing alternatives, it can estimate models of any size, use regression models other than Ordinary Least Squares, incorporate non-linearities in the model specification, and apply custom weights and standard errors. To alleviate concerns about the multicollinearity and conceptual overlap of examined variables, \pkg{ExtremeBounds} allows users to specify sets of mutually exclusive variables, and can restrict the analysis to coefficients from regression models that yield a variance inflation factor within a pre-specified limit.
 }
 \Keywords{extreme bounds analysis, robustness, sensitivity, regression, \proglang{R}}
 \Plainkeywords{extreme bounds analysis, robustness, sensitivity, regression, R} %% without formatting
@@ -55,8 +55,6 @@ This article introduces the \proglang{R} package \pkg{ExtremeBounds} to perform 
 %% end of declarations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
-
 \begin{document}
 
 %% include your article here, just as usual
@@ -79,11 +77,13 @@ These packages can only estimate Leamer's extreme bounds analysis \citep{Shiba19
 
 The \pkg{ExtremeBounds} package, by contrast, estimates both Leamer's and Sala-i-Martin's versions of extreme bounds analysis. It is the first EBA package for the \proglang{R} statistical programming language \citep{R}. It can be installed free of charge from the \citet{CRAN} in the usual way:
  
-\code{> install.packages("ExtremeBounds")}
+\begin{CodeInput}
+R> install.packages("ExtremeBounds")
+\end{CodeInput}
 
-The package provides users with a large number of important features that distinguish it from existing alternatives for EBA estimation. In particular, \pkg{ExtremeBounds} can estimate models of any size, use regression models other than Ordinary Least Squares, incorporate non-linearities in the model specification, and apply custom weights and standard errors. To alleviate concerns about the multicollinearity or conceptual overlap of examined variables, \pkg{ExtremeBounds} allows users to specify sets of mutually exclusive variables. It can also restrict the analysis to coefficients from regression models that yield a variance inflation factor (VIF) within a given maximum limit.
+The package provides users with a large number of important features that distinguish it from existing alternatives for EBA estimation. In particular, \pkg{ExtremeBounds} can estimate models of any size, use regression models other than Ordinary Least Squares, incorporate non-linearities in the model specification, and apply custom weights and standard errors. To alleviate concerns about the multicollinearity or conceptual overlap of examined variables, \pkg{ExtremeBounds} allows users to specify sets of mutually exclusive variables. It can also restrict the analysis to coefficients from regression models that yield a variance inflation factor within a given maximum limit.
 
-In the next section, I briefly describe Leamer's and Sala-i-Martin's extreme bounds analysis. I then provide an overview of these capabilities in Section~\ref{Section3}. In Section~\ref{Section4}, I demonstrate the \pkg{ExtremeBounds} package's usage and capabilities on an empirical example that involves the fuel efficiency of automobiles. Section~\ref{Section5} concludes.
+In the next section, I briefly describe Leamer's and Sala-i-Martin's extreme bounds analysis. I then provide an overview of the \pkg{ExtremeBounds} package's capabilities in Section~\ref{Section3}. In Section~\ref{Section4}, I demonstrate them on an empirical example that involves the fuel efficiency of automobiles. Section~\ref{Section5} concludes.
 
 \section[Extreme bounds analysis (EBA)]{Extreme bounds analysis (EBA)}
 \label{Section2}
@@ -144,13 +144,15 @@ The \pkg{ExtremeBounds} package consists of the main function \code{eba()}, whic
 
 The main function \code{eba()} performs both Leamer's and Sala-i-Martin's versions of extreme bounds analysis using variables from a data frame specified in the function's argument \code{data}. The user specifies the dependent variable (argument \code{y}), the free variables to be included in all regression models (\code{free}), the focus variables that are of interest (\code{focus}), as well as the full set of doubtful variables (\code{doubtful}). Note that the variables included in \code{focus} must be a subset of those in \code{doubtful}. If the user does not provide any focus variables, \code{eba()} will assume that all doubtful variables are of interest to the researcher.
 
+It is often more convenient to specify the model variables through a single \code{formula} argument. The \code{eba()} function allows the user to pass on a multiple-part formula that specifies the dependent, free, focus and doubtful variables. These variables, along with the functional form of the model, are passed on to the \code{formula} argument in an object of class \code{"Formula"}, as implemented by the \pkg{Formula} package \citep{ZeileisCroissant2010}. The model formula takes the following most general form: \code{y ~ free | focus | doubtful}. If all doubtful variables are of interest (i.e., all are focus variables), the user can pass on \code{y ~ free | focus}. Finally, one can also specify a model, in which there are no free variables and all doubtful variables are of interest: \code{y ~ focus}. When using the \code{formula} argument, the \code{doubtful} component of the right-hand side need not contain the \code{focus} variables. Section~\ref{Section4} provides a practical example of specifying the EBA model using both the single \code{formula} argument and the separate \code{y}, \code{free}, \code{focus} and \code{doubtful} arguments. 
+
 If no other arguments are specified, \code{eba()} will conduct a `standard' extreme bounds analysis based on Ordinary Least Squares (OLS) regressions with unadjusted standard errors. All hypothesis tests will be performed at the conventional 95 percent confidence level against the null hypothesis that the relevant parameter is equal to zero. Equal weights will be applied to results from each estimated model, and no maximum limit will be imposed on the variance inflation factor. Following \citet{LevineRenelt1992}, \code{eba()} will include up to three doubtful variables in addition to the focus variable in each regression model. 
 
 The function \code{eba()}, however, also offers a great deal of flexibility for researchers who might be interested in conducting a different kind of extreme bounds analysis. Every aspect of EBA is fully customizable:
 
 \begin{itemize}
 \item \code{eba()} can estimate any type of regression model (argument \code{reg.fun}), not just Ordinary Least Squares (OLS). Researchers can thus easily perform EBA using, for instance, logistic or probit regressions. Attention can, furthermore, be restricted to regressions in which the variance inflation factor on the examined coefficient -- a rule-of-thumb indicator of multicollinearity \citep{MansfieldHelms1982} -- does not exceed a set maximum (argument \code{vif}). Alternatively, users can request that \code{eba()} only use results from regression models that meet some other, user-specified condition (argument \code{include.fun}).
-\item Regression models can be specified very flexibly. They can contain interaction terms, squared or cubic terms to account for non-linear relationships, as well as the lags, natural logarithms or other functions of the included variables. These regression models can be of any size, as the user can choose how many variables should be included in each specification (argument \code{k}).
+\item Regression models can be specified very flexibly (argument \code{formula}). They can contain interaction terms, squared or cubic terms to account for non-linear relationships, as well as the lags, natural logarithms or other functions of the included variables. The function automatically transforms the variables and creates the appropriate model matrices. These regression models can be of any size, as the user can choose how many variables should be included in each specification (argument \code{k}).
 \item Users can specify sets of mutually exclusive variables that will never be included in the same regression model to alleviate concerns about regressor multicollinearity (argument \code{exclusive}). Specifying which doubtful variables cannot be included together can also be useful when several doubtful variables measure the same substantive concept.
 \item All hypothesis tests can be performed at any requested confidence level (argument \code{level}). In addition, the user can specify the null hypothesis value for each regression coefficient (argument \code{mu}). \code{eba()} can thus check whether the estimated coefficients are robustly different from any numerical value, not just from zero.
 \item If desired, weights can be applied to results from each estimated regression (argument \code{weights}). The weights can be based on the regression R$^2$, adjusted R$^2$, McFadden's likelihood ratio index \citep{McFadden1974} or calculated by a user-provided function.
@@ -183,14 +185,14 @@ To produce EBA histograms, the user simply passes an \code{"eba"}-class object c
 
 By default, the histograms include vertical lines that indicate the parameter value under the null hypothesis (argument \code{mu.show}), as well as a kernel density curve that relies on \proglang{R}'s standard \code{density} method (argument \code{density.show}). The kernel density curve provides a non-parametric estimate of the EBA coefficients' probability density function. In addition, the \code{hist()} method for \code{"eba"} objects can overlay the histograms with a density curve for a normal distribution function that approximates the distribution of EBA coefficients (argument \code{normal.show}). 
 
-Many formatting options are available. Users can change the colors and widths of the vertical lines for null hypothesis values (arguments \code{mu.col} and \code{mu.lwd}), of the kernel density curves (\code{density.col} and \code{density.lwd}), and of the density curves for the normally distributed approximation (\code{normal.col} and \code{normal.lwd}). The user also has complete control over a variety of other visual properties of the histograms. These include the histograms' title labels (argument \code{main}), horizontal and vertical axis labels (\code{xlab}), the range of values on the horizontal axis (\code{xlim}), as well as the color of the histogram bars (\code{col}).
+Many formatting options are available. Users can change the colors and widths of the vertical lines for null hypothesis values (arguments \code{mu.col} and \code{mu.lwd}), of the kernel density curves (\code{density.col} and \code{density.lwd}), and of the density curves for the normally distributed approximation (\code{normal.col} and \code{normal.lwd}). The user also has complete control over a variety of other visual properties of the histograms. These include the histograms' title labels (argument \code{main}), the range of values on the horizontal axis (\code{xlim}), as well as the color of the histogram bars (\code{col}).
 
 \section[Example: The fuel economy of automobiles]{Example: The fuel economy of automobiles}
 \label{Section4}
 
-In this section, I demonstrate the capabilities of the \pkg{ExtremeBounds} package using an empirical example. In particular, I identify robust determinants of the fuel economy of selected automobiles using data from the data frame \code{mtcars}. This data frame is included in the \pkg{datasets} package, which is part the standard \pkg{R} distribution \citep{R} and is therefore readily available to the beginning \pkg{ExtremeBounds} user.
+In this section, I demonstrate the capabilities of the \pkg{ExtremeBounds} package using an empirical example. In particular, I identify robust determinants of the fuel economy of selected automobiles using data from the data frame \code{mtcars}. This data frame is included in the \pkg{datasets} package, which is part the standard \proglang{R} distribution \citep{R} and is therefore readily available to the beginning \pkg{ExtremeBounds} user.
 
-The information in \code{mtcars} was extracted from the 1974 \emph{Motor Trend} magazine, and comprises the fuel consumption and ten aspects of vehicle design and performance for a selection of \mbox{1973--1974} automobile models. Existing research literature has already taken advantage of these data for the purpose of demonstrating various statistical methods and procedures \citep{Hocking1976, HendersonVelleman1981}. The \code{mtcars} data set is particularly well-suited for a demonstration of extreme bounds analysis, as its small size allows me to highlight the \pkg{ExtremeBounds} package's most important features without having to perform lengthy estimations of a very large number of regressions.
+The information in \code{mtcars} was extracted from the 1974 \emph{Motor Trend} magazine, and comprises the fuel consumption and ten aspects of vehicle design and performance for a selection of \mbox{1973--1974} automobile models. Existing research literature has already taken advantage of these data for the purpose of demonstrating various statistical methods and procedures \citep{Hocking1976, HendersonVelleman1981}. The \code{mtcars} data set is particularly well-suited for a demonstration of extreme bounds analysis, as its small size allows me to highlight the \pkg{ExtremeBounds} package's most important features without having to perform time-consuming estimations of a very large number of regressions.
 
 The data frame \code{mtcars} contains 32 observations. Each observation is one particular model of automobile (e.g., \code{"Mazda RX4"}, \code{"Cadillac Fleetwood"} or \code{"Fiat X1-9"}). For each model, the data frame contains information on its fuel economy, expressed as the vehicle's miles per gallon (variable \code{mpg}), and about its engine -- the number of cylinders (\code{cyl}) and carburetors (\code{carb}), its displacement in cubic inches (\code{disp}), its gross horsepower (\code{hp}), as well as whether it is a V- or a straight engine (\code{vs}).  In addition, we are given information about each model's rear axle ratio (\code{drat}), weight in thousands of pounds (\code{wt}), and quarter-mile time in seconds (\code{qsec}). The variable \code{gear} contains the number of forward gears, while \code{am} indicates whether the automobile has an automatic or manual transmission, with a value of 1 denoting a manual transmission.
 
@@ -199,22 +201,28 @@ First, I would like to get a basic sense of which determinants might be most rob
 
 From a statistical point of view, this type of EBA is somewhat na\"ive, as it does not take into account the possibility of high multicollinearity among the included variables. Neither does it account for the possibility that some variables measure similar concepts. The number of cylinders (\code{cyl}) and the gross horsepower (\code{hp}) might, for example, both be seen as measures of the engine's overall performance. Researchers interested in examining the fuel economy of automobiles would thus, in contrast to my na\"ive EBA, be unlikely to include both explanatory variables in the same regression model.
 
-An extreme bounds analysis with all combinations of doubtful variables might nevertheless yield some valuable insights. In particular, it provides a particularly strong test for a determinant's robustness. As \citet{McAleer1985} suggest, such an EBA might indicate which variables variables should be treated as free, and therefore be included in all regression models in further EBA analyses.
+An extreme bounds analysis with all combinations of doubtful variables might nevertheless yield some valuable insights. In particular, it provides a particularly strong test for a determinant's robustness. As \citet{McAleer1985} suggest, such an EBA might indicate which variables should be treated as free, and therefore be included in all regression models in further EBA analyses.
 
 I estimate the na\"ive EBA by calling the \code{eba()} function:
+\begin{CodeInput}
+R> naive.eba <- eba(formula = mpg ~ cyl + carb + disp + hp + vs + drat + wt 
++ qsec + gear + am, data = mtcars, k = 0:9) 
+\end{CodeInput}
 
-\begin{Code}
-> naive.eba <- eba(data = mtcars, y = "mpg", doubtful = c("cyl", "carb", 
+\newpage
+Alternatively, I can use character vectors to specify the dependent and doubtful variables using the \code{y} and \code{doubtful} arguments, respectively:
+\begin{CodeInput}
+R> naive.eba <- eba(data = mtcars, y = "mpg", doubtful = c("cyl", "carb", 
 "disp", "hp", "vs", "drat", "wt", "qsec", "gear", "am"), k = 0:9)
-\end{Code}
+\end{CodeInput}
 
 Since the \code{focus} argument is not specified, all the \code{doubtful} variables will be treated as focus variables. The argument \code{k = 0:9} ensures that, on top of the focus variable, up to nine doubtful variables will be included in each regression model. As a result, regressions with all possible combinations of the ten doubtful variables will be estimated. The \code{eba()} function will return an object of class \code{"eba"} that will be stored in \code{naive.eba}. 
 
 Next, I ask \pkg{ExtremeBounds} to produce a set of histograms that summarize the EBA estimation results. To do so, I simply pass the \code{naive.eba} object to the \code{hist()} method:
 
-\begin{Code}
-> hist(naive.eba)
-\end{Code}
+\begin{CodeInput}
+R> hist(naive.eba)
+\end{CodeInput}
 
 The resulting histograms are reproduced in Figure~\ref{NaiveHist}. The gray bins contain the Ordinary Least Squares (OLS) coefficients on each examined variable from all of the estimated regression models. Superimposed over each histogram is a thick blue curve that represents the corresponding kernel density, a non-parametric approximation of the regression coefficients' distribution. There is also a red vertical line at zero, the default coefficient value under the null hypothesis.
 
@@ -222,12 +230,12 @@ A visual inspection of the histograms allows me to get a quick overview of the E
 
 Conversely, if most of the bins' area lies to the left of zero, greater values of the corresponding variable are associated with lower miles per gallon, \emph{ceteris paribus}, in most estimated regressions. Na\"ive EBA estimation results indicate that engines with more cylinders (\code{cyl}), curburetors (\code{carb}) and with greater gross horsepower (\code{hp}) achieve worse fuel economy. The vehicle's greater weight (\code{wt}) is consistently associated with greater fuel consumption. In fact, \code{wt} is the only variable for which all of the estimated regression coefficients have the same (in this case, negative) sign.
 
-Engine displacement (code \code{disp}) appears to be an interesting case, as the distribution of the regression coefficients appears to be bimodal. Some are negative, while others are positive. The bimodal nature of the distribution can be easily seen from the two different peaks of the histogram bins, as well as from the double hump of the kernel density curve.
+Engine displacement (\code{disp}) appears to be an interesting case, as the distribution of the regression coefficients appears to be bimodal. Some are negative, while others are positive. The bimodal nature of the distribution can be easily seen from the two different peaks of the histogram bins, as well as from the double hump of the kernel density curve.
 
 \begin{figure}[htp!]
 	\centering
 	\includegraphics[width=0.98\textwidth]{naive.pdf}
-	\caption{Histograms that summarize the estimation results of the na\"ive EBA.}
+	\caption{Histograms that summarize the estimation results of the na\"ive EBA. The magnitudes of regression coefficients are on the horizontal axis. The vertical axis indicates the corresponding probability density.}
 	\label{NaiveHist}
 \end{figure}
 
@@ -235,13 +243,13 @@ Engine displacement (code \code{disp}) appears to be an interesting case, as the
 \subsection[A more sophisticated EBA]{A more sophisticated EBA}
 Having inspected the results of my na\"ive EBA, I can now use the \code{ExtremeBounds} package's capabilities to make my analysis more sophisticated. In particular, I make the following changes to the \code{eba()} function call:
 \begin{itemize}
-\item Results from the na\"ive EBA have indicated that the regression coefficients on the vehicle's weight (variable \code{wt}) are negative, regardless of the model specification. For this reason, I treat \code{wt} as a free variable to be included in all regression models, and therefore include it in \code{eba}'s \code{free} argument.
+\item Results from the na\"ive EBA have indicated that the regression coefficients on the vehicle's weight (variable \code{wt}) are negative, regardless of the model specification. For this reason, I treat \code{wt} as a free variable to be included in all regression models.
 \item Some of the doubtful variables measure similar concepts, and were therefore inappropriately included together in regression models by the na\"ive EBA. To prevent conceptual overlap, I use the \code{exclusive} parameter to specify two sets of mutually exclusive variables:
 \begin{itemize}
 \item One set consists of variables that might be construed as measuring the performance of the engine: the number of cylinders (\code{cyl}), the number of carburetors (\code{carb}), engine displacement (\code{disp}) and the gross horsepower (\code{hp}).
 \item The other set consists of the two doubtful variables that have to do with the car's transmission: the \code{am} indicator of an automatic vs. manual transmission, and the number of forward gears (\code{gear}).
 \end{itemize}
-\item I am only interested in estimation results for the four variables that measure engine performance: \code{cyl}, \code{carb}, \code{disp} and \code{hp}. Using the \code{focus} argument, I specify them as the focus variables.
+\item I am only interested in estimation results for the four variables that measure engine performance: \code{cyl}, \code{carb}, \code{disp} and \code{hp}. I therefore specify them as the focus variables.
 \item Rather than estimating all possible combinations of the doubtful variables as I did in the na\"ive EBA, I only add combinations of up to three doubtful variables to the focus variable in each specification. The value of the \code{k} argument will thus remain at its default value of \code{0:3}.
 \item To eliminate the influence of coefficient estimates from model specifications that suffer from high multicollinearity, I specify a maximum acceptable variance inflation factor by setting \code{vif = 7}.
 \item I use heteroskedasticity-robust standard errors \citep{White1980}, as calculated by the \mbox{\pkg{sandwich}} package \citep{Zeileis2004, Zeileis2006}. To be able to do this, I define the \code{se.robust} function (below) that calculates the standard errors, and pass it to the \code{eba()} function:
@@ -258,27 +266,36 @@ se.robust <- function(model.object) {
 \end{itemize}
 \newpage
 I execute the following \proglang{R} code to estimate this more sophisticated extreme bounds analysis:
-\begin{Code}
-> doubtful.variables <- c("cyl", "carb", "disp", "hp", "vs", 
+\begin{CodeInput}
+R> sophisticated.eba <- eba(formula = mpg ~ wt | cyl + carb + disp + hp |  
++                                     vs + drat + wt + qsec + gear + am, 
++                           data = mtcars, 
++                           exclusive = ~ cyl + carb + disp + hp | am + gear, 
++                           vif = 7, se.fun = se.robust, weights = "lri")
+\end{CodeInput}
+
+I could, of course, achieve the same result by passing the sets of variables via the \code{y}, \code{free}, \code{doubtful} and \code{focus} arguments, as shown below. The \code{exclusive} argument can accept a list of character vectors in lieu of a multiple-part \code{"Formula"} object.
+\begin{CodeInput}
+R> doubtful.variables <- c("cyl", "carb", "disp", "hp", "vs", 
 +                         "drat", "wt", "qsec", "gear", "am")
-> engine.variables <- c("cyl", "carb", "disp", "hp")
-> transmission.variables <- c("am", "gear")
+R> engine.variables <- c("cyl", "carb", "disp", "hp")
+R> transmission.variables <- c("am", "gear")
  
-> sophisticated.eba <- eba(data = mtcars, y = "mpg", free = "wt", 
-+                          doubtful = doubtful.variables, 
-+                          focus = engine.variables,
-+                          exclusive = list(engine.variables,
-+                                           transmission.variables),
-+                          vif = 7, se.fun = se.robust, weights = "lri")
-\end{Code}
+R> sophisticated.eba <- eba(data = mtcars, y = "mpg", free = "wt", 
++                           doubtful = doubtful.variables, 
++                           focus = engine.variables,
++                           exclusive = list(engine.variables,
++                                            transmission.variables),
++                           vif = 7, se.fun = se.robust, weights = "lri")
+\end{CodeInput}
 
 Again, I produce a set of histograms that will allow me to get an initial sense of the results of my analysis. This time, I include the \code{hist()} method's \code{variables} argument to request histograms only for the four focus variables that I am interested in. Additionally, I use the \code{main} argument to make each histogram's main title more descriptive and the \code{normal.show} argument to request that \code{hist()} superimpose a density curve with a normally distributed approximation to the coefficient distribution.
-\begin{Code}
-> hist(sophisticated.eba, variables = engine.variables,
-+      main = c(cyl = "number of cylinders", carb = "number of carburetors",
-+               disp = "engine displacement", hp = "gross horsepower"),
-+      normal.show = TRUE)
-\end{Code}
+\begin{CodeInput}
+R> hist(sophisticated.eba, variables = c("cyl", "carb", "disp", "hp"),
++       main = c(cyl = "number of cylinders", carb = "number of carburetors",
++                disp = "engine displacement", hp = "gross horsepower"),
++       normal.show = TRUE)
+\end{CodeInput}
 
 As the histograms in Figure~\ref{SophisticatedHist} show, the more sophisticated EBA leads to more clear-cut predictions about the signs of regression coefficients than the na\"ive EBA estimated earlier. The coefficients on all four focus variables are consistently negative. This result suggests that, across a wide variety of reasonably well-specified regression models, a greater number of cylinders and carburetors, as well as greater engine displacement and gross horsepower, are associated with worse fuel economy (i.e., with fewer miles per gallon).
 
@@ -288,22 +305,22 @@ It is, moreover, evident that the blue kernel density curve and the green normal
 \begin{figure}[htp!]
 	\centering
 	\includegraphics[width=0.98\textwidth]{sophisticated.pdf}
-	\caption{Histograms that summarize the estimation results of the sophisticated EBA.}
+	\caption{Histograms that summarize the estimation results of the sophisticated EBA. The magnitudes of regression coefficients are on the horizontal axis. The vertical axis indicates the corresponding probability density.}
 	\label{SophisticatedHist}
 \end{figure}
 
-In addition to histograms, \pkg{ExtremeBounds} allows users to examine EBA results through the text output produced by the \code{print()} method. This method produces a wealth of detailed information about the estimation results from both Leamer's and Sala-i-Martin's extreme bounds analysis. In the interest of clarity, I reproduce only the portions of \code{print()} output that are most relevant to my empirical example in the paragraphs that follow. \pkg{ExtremeBound} users can type \code{?print.eba} in the \pkg{R} console to obtain a complete description of the text output. 
+In addition to histograms, \pkg{ExtremeBounds} allows users to examine EBA results through the text output produced by the \code{print()} method. This method produces a wealth of detailed information about the estimation results from both Leamer's and Sala-i-Martin's extreme bounds analysis. In the interest of clarity, I reproduce only the portions of \code{print()} output that are most relevant to my empirical example. \pkg{ExtremeBound} users can type \code{?print.eba} in the \proglang{R} console to obtain a complete description of the text output. 
 
 I obtain a text summary of my analysis results by passing the \code{"eba"}-class object to the \code{print()} method:
-\begin{Code}
-> print(sophisticated.eba)
-\end{Code}
+\begin{CodeInput}
+R> print(sophisticated.eba)
+\end{CodeInput}
 \newpage
-At the top of the \code{print()} method's text output, we find information about the number of specifications that were estimated. In total, there are 148 possible combinations of the examined doubtful variables that contain at least one focus variable. Since the parameter \code{draws} is not specified, no random sampling of estimated model occurs. As a result, \code{eba()} estimates all of the available combinations. 
+At the top of the \code{print()} method's text output, we find information about the number of specifications that were estimated. In total, there are 148 possible combinations of the examined doubtful variables that contain at least one focus variable. Since the parameter \code{draws} is not specified, no random sampling of estimated models occurs. As a result, \code{eba()} estimates all of the available combinations. 
 
-The free variable \code{wt} occurs, of course, in all 148 regression models. The focus variables are included in fewer specifications since each of them does not appear in some doubtful variable combinations. The four focus variables have, furthermore, been specified as mutually exclusive (in the \code{eba()} function's argument \code{exclusive}) and cannot therefore be included together in the same regression model. The \code{print()} method reports that the focus variables \code{cyl}, \code{carb}, \code{disp} and \code{hp} appear in 37 specifications each. The output also indicates that only 26 and 14 coefficient estimates (rather than all 37) were used in the extreme bounds analysis for the variables \code{cyl} and \code{disp}, respectively. The reduction in coefficient used occurs because the variance inflation factors on some \code{cyl} and \code{disp} coefficients exceed the specified \mbox{maximum of 7}.
+The free variable \code{wt} occurs, of course, in all 148 regression models. The focus variables are included in fewer specifications since each of them does not appear in some doubtful variable combinations. The four focus variables have, furthermore, been specified as mutually exclusive (in the \code{eba()} function's argument \code{exclusive}) and cannot therefore be included together in the same regression model. The \code{print()} method reports that the focus variables \code{cyl}, \code{carb}, \code{disp} and \code{hp} appear in 37 specifications each. The output also indicates that only 26 and 14 coefficient estimates (rather than all 37) were used in the extreme bounds analysis for the variables \code{cyl} and \code{disp}, respectively. The reduction in the number of coefficients used occurs because the variance inflation factors on some \code{cyl} and \code{disp} coefficients exceed the specified \mbox{maximum of 7}.
 
-\begin{Code}
+\begin{CodeOutput}
 Number of combinations: 148
 Regressions estimated: 148 (100% of combinations)
 
@@ -316,13 +333,13 @@ Number of coefficients used by variable:
 
 (Intercept)          wt         cyl        carb        disp          hp 
         148         148          26          37          14          37 
-\end{Code}
+\end{CodeOutput}
 
 Next, the \code{print()} method reports the weighted means of coefficient and standard error estimates for the free and focus variables across the estimated regression models. The weights are specified in the \code{eba()} function's \code{weights} argument. In the sophisticated analysis I ran, I weight regression models by the likelihood ratio index. 
 
-The table reproduced below shows that, on average, a vehicle weight (\code{wt}) that is greater by a thousand pounds is associated with 3.623 fewer miles per gallon (\code{mpg}). An additional cylinder (\code{cyl}) or carburetor (\code{carb}) is correlated with a fuel consumption that is lower by 1.370 and 0.822 miles per gallon, respectively. One cubic inch of additional engine displacement (\code{disp}) correlates with 0.016 fewer miles per gallon. Finally, a gallon of fuel yields 0.027 fewer miles with each unit of gross horsepower (\code{hp}). Relative to the size of the coefficients, the weighted standard errors are relatively small.
+The table reproduced below shows that, on average, a vehicle weight (\code{wt}) that is greater by a thousand pounds is associated with 3.623 fewer miles per gallon (\code{mpg}). An additional cylinder (\code{cyl}) or carburetor (\code{carb}) yields a fuel consumption that is lower by 1.370 and 0.822 miles per gallon, respectively. One cubic inch of additional engine displacement (\code{disp}) is associated with 0.016 fewer miles per gallon. Finally, a gallon of fuel yields 0.027 fewer miles with each unit of gross horsepower (\code{hp}). Relative to the size of the coefficients, the weighted standard errors are relatively small.
 \newpage
-\begin{Code}
+\begin{CodeOutput}
 Beta coefficients:
 
               Type  Coef (Wgt Mean)  SE (Wgt Mean)
@@ -332,11 +349,11 @@ cyl          focus           -1.370          0.403
 carb         focus           -0.822          0.327
 disp         focus           -0.016          0.008
 hp           focus           -0.027          0.008
-\end{Code}
+\end{CodeOutput}
 
 The text output from \code{print()} proceeds to summarize the distribution of coefficient estimates. It reports the proportions, expressed as percentages, of estimated regression coefficients that are lower or greater than zero. In our example, the coefficients on \code{wt}, \code{cyl}, \code{carb}, \code{disp} and \code{hp} are all negative, while the coefficients on the intercept term in the linear regression are always positive. These statistics are, of course, consistent with the information displayed in the histograms in Figure~\ref{SophisticatedHist}.
 
-\begin{Code}
+\begin{CodeOutput}
 Distribution of beta coefficients:
 
               Type  Pct(beta < 0)  Pct(beta > 0)  
@@ -346,11 +363,11 @@ cyl          focus            100              0
 carb         focus            100              0     
 disp         focus            100              0     
 hp           focus            100              0     
-\end{Code}
+\end{CodeOutput}
 
 Even though all the free and focus variables' coefficients are negative, some of the point estimates may not be distinguishable from zero in a statistically significant way. The text output also includes the percentages of regression coefficients that are \emph{both} statistically significant and lower/greater than zero. We find that only in the case of the free variable \code{wt} are all the coefficients statistically significant. A very large majority of coefficient estimates are significant for the \code{cyl} and \code{hp} variables (92.3 and 81.1 percent, respectively). By contrast, only about 60 percent of coefficients on \code{carb} and \code{disp} are statistically significant.
 
-\begin{Code}
+\begin{CodeOutput}
 Distribution of beta coefficients:
 
               Type  Pct(signif & beta < 0)  Pct(signif & beta > 0)
@@ -360,11 +377,11 @@ cyl          focus                  92.308                    0.00
 carb         focus                  59.459                    0.00
 disp         focus                  57.143                    0.00
 hp           focus                  81.081                    0.00
-\end{Code}
+\end{CodeOutput}
 \newpage
 The \code{print()} method then goes on to summarize results from Leamer's extreme bounds analysis. It produces a table that includes the lower and upper extreme bounds of regression coefficient estimates, and -- based on these bounds -- classifies determinants as robust or fragile. The only variable that is found to be robust using Leamer's EBA is the free variable \code{wt}. Since the upper and lower extreme bounds of all the focus variables have opposite signs, they are declared to be fragile.
 
-\begin{Code}
+\begin{CodeOutput}
 Leamer's Extreme Bounds Analysis (EBA):
 
               Type  Lower Extreme Bound  Upper Extreme Bound  Robust/Fragile?
@@ -374,13 +391,13 @@ cyl          focus               -2.295                0.101          fragile
 carb         focus               -2.197                0.358          fragile
 disp         focus               -0.034                0.009          fragile
 hp           focus               -0.052                0.002          fragile
-\end{Code}
+\end{CodeOutput}
 
 Finally, the text output includes results from Sala-i-Martin's extreme bounds analysis. The histograms in Figure~\ref{SophisticatedHist} suggest that the normally distributed approximation of the regression coefficients' distribution does not provide a good fit to the data. For this reason, I focus on EBA results from the generic model, which does does not assume any particular distribution of coefficient estimates across different specifications.
 
 As the table presented below indicates, results from Sala-i-Martin's EBA suggest very little fragility of the coefficient estimates. For variables \code{wt}, \code{cyl} and \code{hp}, more than 99 percent of the cumulative distribution of regression coefficients lies below zero. The same can be said of more than 95 percent of the cumulative distributions for variables \code{carb} and \code{disp}. According to results from Sala-i-Martin's EBA, all of the free and focus variables appear to be robustly (and negatively) associated with the automobiles' miles per gallon (\code{mpg}). In contrast to Leamer's EBA in which a single insignificant coefficient implies fragility, the less stringent Sala-i-Martin's EBA classifies more variables as robust determinants of fuel economy.
 
-\begin{Code}
+\begin{CodeOutput}
 Sala-i-Martin's Extreme Bounds Analysis (EBA):
 
               Type  G: CDF(beta <= 0)  G: CDF(beta > 0)
@@ -390,7 +407,7 @@ cyl          focus             99.521             0.479
 carb         focus             95.315             4.685
 disp         focus             95.200             4.800
 hp           focus             99.047             0.953
-\end{Code}
+\end{CodeOutput}
 
 All in all, the extreme bounds analysis in this empirical example suggests that the examined automobiles' weight and engine performance are robustly associated with the vehicles' fuel economy. In conducting the analysis, I have demonstrated some of the most important features of the \pkg{ExtremeBounds} package. Specifically, I have shown how researchers can estimate Leamer's and Sala-i-Martin's EBA using the fully customizable \code{eba()} function. The estimation results can then be visually inspected with the help of the \code{hist()} method that produces histograms of each examined variable's coefficient estimates. Finally, the \code{print()} method provides users with text output that contains a detailed summary of EBA estimation results. In the next section, I conclude.
 
@@ -404,7 +421,7 @@ In this paper, I have introduced the \pkg{ExtremeBounds} package for the \progla
 I have showcased many of these customizable features through an empirical example that focused on the determinants of selected automobiles' fuel economy. Along the way, I have also demonstrated the package's ability to produce histograms of estimated regression coefficients via the \code{hist()} method, and to print out a detailed text summary of the EBA estimation results through the \code{print()} method.
 
 \section*{Acknowledgments}
-I would like to thank Rebecca Goldstein, Daniel Yew Mao Lim and Christopher Lucas for helpful comments and suggestions.
+I would like to thank Soo Jin Cho, Rebecca Goldstein, Daniel Yew Mao Lim and Christopher Lucas for helpful comments and suggestions.
 
 \bibliography{ExtremeBounds}
 

@@ -12,23 +12,25 @@
 \code{eba} is used to perform extreme bounds analysis (EBA), a global sensitivity test that examines the robustness of the association between a dependent variable and a variety of possible determinants. The \code{eba} function performs a demanding version of EBA, proposed by Leamer (1985), that focuses on the upper and lower extreme bounds of regression estimates, as well as a more flexible version proposed by Sala-i-Martin (1997). Sala-i-Martin's EBA considers the entire distribution of regression coefficients. For Sala-i-Martin's version of extreme bounds analysis, \code{eba} estimates results for both the normal model (in which regression coefficients are assumed to be normally distributed across models) and the generic model (where no such assumption is made).
 }
 \usage{
-eba(data, y, free = NULL, doubtful = NULL, focus = NULL,
+eba(formula = NULL, data, 
+    y = NULL, free = NULL, doubtful = NULL, focus = NULL,
     k = 0:3, mu = 0, level = 0.95, vif = NULL, exclusive = NULL, 
     draws = NULL, reg.fun = lm, se.fun = NULL, include.fun = NULL,
     weights = NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+  \item{formula}{a formula that specifies the EBA model that the function will run. Most generally, the formula is of the following format: \code{y ~ free | focus | (additional) doubtful}. See the arguments \code{y}, \code{free}, \code{doubtful} and \code{focus} below for a more detailed description of what each of these variable categories means. Note that one can also specify that all doubtful variables are of interest (i.e., all are 'focus' variables): \code{y ~ free | focus}. Finally, the user can also specify a model with no free variables, in which all doubtful variables are considered to be 'focus': \code{y ~ focus}.}
   \item{data}{a data frame containing the variables used in the extreme bounds analysis.}
   \item{y}{a character string that specifies the dependent variable.}
   \item{free}{a character vector that specifies the 'free' variables to be used in the analysis. These variables are included in each regression model.}
   \item{doubtful}{a character vector that specifies the 'doubtful' variables to be used in the analysis. These variables will be included, in various combinations, in the estimated regression models.}
   \item{focus}{a character vector that specifies the 'focus' variables of the extreme bounds analysis. These are the variables whose robustness the user wants to test. The focus variables must be a subset of the variables included in the argument \code{doubtful}. Since these are the variables of interest, \code{eba} will only run regressions with doubtful variable combinations that contain at least one focus variable.}
   \item{k}{a vector of integers that specifies the number of doubtful variables that will be included in each estimated regression model in addition to the focus variable. Following Levine and Renelt (1992), the default is set to \code{0:3}, meaning that up to three additional doubtful variables will be included in each model on top of the focus variable.}
-  \item{mu}{a named vector of numeric values that specifies regression coefficients under the null hypothesis. The names of the vector's components indicate which variable the null hypothesis coefficients belong to. These null hypothesis coefficient values will be used in all hypothesis testing. Alternatively, the argument \code{mu} can be a single numeric value that will set the null hypothesis values for all variables' coefficients. By default, \code{mu} will be equal to zero for all examined variables, as is standard in most applications of extreme bounds analysis.}
+  \item{mu}{a named vector of numeric values that specifies regression coefficients under the null hypothesis. The names of the vector's elements indicate which variable the null hypothesis coefficients belong to. These null hypothesis coefficient values will be used in all hypothesis testing. Alternatively, the argument \code{mu} can be a single numeric value that will set the null hypothesis values for all variables' coefficients. By default, \code{mu} will be equal to zero for all examined variables, as is standard in most applications of extreme bounds analysis.}
   \item{level}{a numeric value between 0 and 1 that indicates the confidence level to be used in determining the robustness/fragility of determinants.}
   \item{vif}{a numeric value that sets the maximum limit on a coefficient's variance inflation factor (VIF), a rule-of-thumb indicator of multicollinearity. Only coefficient estimates whose VIF does not exceed the limit will be considered in the analysis. If \code{NULL} (default), no limit on the VIF is imposed.}
-  \item{exclusive}{a list of character vectors. Each character vector specifies a set of mutually exclusive doubtful variables. These variables will never be included in the same regression model. Specifying which doubtful variables may not be included together in the same model can help alleviate concerns about regressor multicollinearity, and can also be useful when several doubtful variables measure the same substantive concept.}
+  \item{exclusive}{a list of character vectors, or a formula with sets of mutually exclusive variables separated by \code{|}. Each character vector (or formula component) specifies a set of mutually exclusive doubtful variables. These variables will never be included in the same regression model. Specifying which doubtful variables may not be included together in the same model can help alleviate concerns about regressor multicollinearity, and can also be useful when several doubtful variables measure the same substantive concept.}
   \item{draws}{a positive integer value that specifies how many regressions \code{eba} should run. These regressions will be randomly drawn (without replacement, and each with equal probability) from the full set of doubtful variable combinations (that, of course, contain the variables specified in \code{focus}). Such a random draw can be useful when estimating the full set of regressions would require too much time. If NULL (default), there will be no random sampling of regression model and all combinations will be estimated.}
   \item{reg.fun}{a function that estimates the desired regression model. The function must accept arguments \code{formula} and \code{data} in the same way that the standard functions \code{lm} and \code{glm} do. Additional arguments can be passed on via the \code{\dots} argument. In this way, the user can make \code{eba} estimate, say, a logistic or probit regression by setting \code{reg.fun = glm} and passing on the appropriate values for \code{glm}'s \code{family} argument through \code{eba}'s \code{\dots} argument. By default, an Ordinary Least Squares (OLS) regression is performed via the \code{lm} function.}
   \item{se.fun}{a function that calculates the standard errors for regression coefficient estimates. The function must accept the regression model object as its first argument, and must return a numeric vector with element names that identify the corresponding regressors.}
@@ -127,7 +129,7 @@ Harvard University, Political Economy and Government \cr
 }
 \section{Please cite as:}{
 Hlavac, Marek (2014). ExtremeBounds: Extreme Bounds Analysis in R.\cr
-R package version 0.1.3. http://CRAN.R-project.org/package=ExtremeBounds 
+R package version 0.1.4.1. http://CRAN.R-project.org/package=ExtremeBounds 
 }
 \seealso{
 \code{\link{hist.eba}}, \code{\link{print.eba}}
@@ -136,11 +138,18 @@ R package version 0.1.3. http://CRAN.R-project.org/package=ExtremeBounds
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \examples{
-# perform Extreme Bound Analysis
-eba.results <- eba(data = mtcars[1:10, ], y = "mpg", free = "wt",
-                   doubtful = c("cyl","disp","hp","drat","qsec","vs","am","gear","carb"),
-                   focus = c("hp","gear"), 
-                   exclusive = list(c("cyl","disp","hp"), c("am","gear")))
+# perform Extreme Bounds Analysis
+
+eba.results <- eba(formula = mpg ~ wt | hp + gear | cyl + disp + drat + qsec + vs + am + carb,
+                   data = mtcars[1:10, ], exclusive = ~ cyl + disp + hp | am + gear)
+
+# The same result can be achieved by running:
+# eba.results <- eba(data = mtcars[1:10, ], y = "mpg", free = "wt",
+#                    doubtful = c("cyl", "disp", "hp", "drat", "qsec", 
+#                                 "vs", "am", "gear", "carb"),
+#                    focus = c("hp", "gear"), 
+#                    exclusive = list(c("cyl", "disp", "hp"), 
+#                                     c("am", "gear")))
 
 # print out results
 print(eba.results)
