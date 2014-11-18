@@ -11,7 +11,7 @@
 function(libname, pkgname) {
   packageStartupMessage("\nPlease cite as: \n")
   packageStartupMessage(" Hlavac, Marek (2014). ExtremeBounds: Extreme Bounds Analysis in R.")
-  packageStartupMessage(" R package version 0.1.4.1. http://CRAN.R-project.org/package=ExtremeBounds \n")
+  packageStartupMessage(" R package version 0.1.4.2. http://CRAN.R-project.org/package=ExtremeBounds \n")
 }
 
 
@@ -436,7 +436,7 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
           vif[r,i] <- calculate.vif(reg)[variable.label] 
           nobs[r,i] <- length(reg$residuals)
           
-          formula[r,i] <- deparse(reg.formula[[r]], width.cutoff = 500)
+          formula[r,i] <- Reduce(paste, deparse(reg.formula[[r]], width.cutoff = 500))
           
           # weights
           if (is.null(weights)) { weight[r,i] <- 1 }
@@ -753,7 +753,8 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
   
   get.formula.term.labels <-
     function(Formula.object, rhs=NULL) {
-      subformula <- gsub("~","", deparse(as.Formula(formula(Formula.object, lhs=0, rhs=rhs))), fixed=TRUE)
+      deparsed <- Reduce(paste, deparse(as.Formula(formula(as.Formula(Formula.object), lhs=0, rhs=rhs, width.cutoff=500))))
+      subformula <- gsub("~","", deparsed, fixed=TRUE)
       return(trim(str.split.outermost(subformula, "+")))
     }
   
