@@ -1,2 +1,5 @@
 exportPattern("^[^\\.]")
 import(Formula)
+S3method(hist, eba)
+S3method(print, eba)
+S3method(summary, eba)

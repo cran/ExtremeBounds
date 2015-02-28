@@ -31,7 +31,7 @@ eba(formula = NULL, data,
   \item{level}{a numeric value between 0 and 1 that indicates the confidence level to be used in determining the robustness/fragility of determinants.}
   \item{vif}{a numeric value that sets the maximum limit on a coefficient's variance inflation factor (VIF), a rule-of-thumb indicator of multicollinearity. Only coefficient estimates whose VIF does not exceed the limit will be considered in the analysis. If \code{NULL} (default), no limit on the VIF is imposed.}
   \item{exclusive}{a list of character vectors, or a formula with sets of mutually exclusive variables separated by \code{|}. Each character vector (or formula component) specifies a set of mutually exclusive doubtful variables. These variables will never be included in the same regression model. Specifying which doubtful variables may not be included together in the same model can help alleviate concerns about regressor multicollinearity, and can also be useful when several doubtful variables measure the same substantive concept.}
-  \item{draws}{a positive integer value that specifies how many regressions \code{eba} should run. These regressions will be randomly drawn (without replacement, and each with equal probability) from the full set of doubtful variable combinations (that, of course, contain the variables specified in \code{focus}). Such a random draw can be useful when estimating the full set of regressions would require too much time. If NULL (default), there will be no random sampling of regression model and all combinations will be estimated.}
+  \item{draws}{a positive integer value that specifies how many regressions \code{eba} should be run. These regressions will be randomly drawn (without replacement, and each with equal probability) from the full set of doubtful variable combinations (that, of course, contain the variables specified in \code{focus}). Such a random draw can be useful when estimating the full set of regressions would require too much time. If NULL (default), there will be no random sampling of regression model and all combinations will be estimated.}
   \item{reg.fun}{a function that estimates the desired regression model. The function must accept arguments \code{formula} and \code{data} in the same way that the standard functions \code{lm} and \code{glm} do. Additional arguments can be passed on via the \code{\dots} argument. In this way, the user can make \code{eba} estimate, say, a logistic or probit regression by setting \code{reg.fun = glm} and passing on the appropriate values for \code{glm}'s \code{family} argument through \code{eba}'s \code{\dots} argument. By default, an Ordinary Least Squares (OLS) regression is performed via the \code{lm} function.}
   \item{se.fun}{a function that calculates the standard errors for regression coefficient estimates. The function must accept the regression model object as its first argument, and must return a numeric vector with element names that identify the corresponding regressors.}
   \item{include.fun}{a function that determines whether the results from a particular regression model will be included in the analysis. The function must accept the regression model object as its first argument, and must return a logical value. Only regression models for which the function returns a value of TRUE will be included in the extreme bounds analysis.}
@@ -128,8 +128,8 @@ Marek Hlavac   < hlavac at fas.harvard.edu > \cr
 Harvard University, Political Economy and Government \cr
 }
 \section{Please cite as:}{
-Hlavac, Marek (2014). ExtremeBounds: Extreme Bounds Analysis in R.\cr
-R package version 0.1.4.2. http://CRAN.R-project.org/package=ExtremeBounds 
+Hlavac, Marek (2015). ExtremeBounds: Extreme Bounds Analysis in R.\cr
+R package version 0.1.5. http://CRAN.R-project.org/package=ExtremeBounds 
 }
 \seealso{
 \code{\link{hist.eba}}, \code{\link{print.eba}}
