@@ -11,7 +11,7 @@
 function(libname, pkgname) {
   packageStartupMessage("\nPlease cite as: \n")
   packageStartupMessage(" Hlavac, Marek (2015). ExtremeBounds: Extreme Bounds Analysis in R.")
-  packageStartupMessage(" R package version 0.1.5. http://CRAN.R-project.org/package=ExtremeBounds \n")
+  packageStartupMessage(" R package version 0.1.5.1. http://CRAN.R-project.org/package=ExtremeBounds \n")
 }
 
 

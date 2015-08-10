@@ -5,9 +5,9 @@ citEntry(
   title = "ExtremeBounds: Extreme Bounds Analysis in R",
   author = as.person("Marek Hlavac"),
   year = "2015",
-  note = "R package version 0.1.5",
+  note = "R package version 0.1.5.1",
   organization = "Harvard University",
   address = "Cambridge, USA",
-  textVersion = "Hlavac, Marek (2015). ExtremeBounds: Extreme Bounds Analysis in R. R package version 0.1.5. http://CRAN.R-project.org/package=ExtremeBounds",
+  textVersion = "Hlavac, Marek (2015). ExtremeBounds: Extreme Bounds Analysis in R. R package version 0.1.5.1. http://CRAN.R-project.org/package=ExtremeBounds",
   url = "http://CRAN.R-project.org/package=ExtremeBounds"
 )

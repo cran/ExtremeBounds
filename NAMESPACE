@@ -1,5 +1,5 @@
 exportPattern("^[^\\.]")
-import(Formula)
+import(Formula, graphics, methods, stats, utils)
 S3method(hist, eba)
 S3method(print, eba)
 S3method(summary, eba)
