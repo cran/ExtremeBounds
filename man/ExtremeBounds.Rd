@@ -19,8 +19,7 @@ Marek Hlavac   < hlavac at fas.harvard.edu > \cr
 Harvard University, Political Economy and Government \cr
 }
 \section{Please cite as:}{
-Hlavac, Marek (2015). ExtremeBounds: Extreme Bounds Analysis in R.\cr
-R package version 0.1.5.1. http://CRAN.R-project.org/package=ExtremeBounds 
+Hlavac, Marek (2016). ExtremeBounds: Extreme Bounds Analysis in R. \emph{Journal of Statistical Software}, 72(9), 1-22. doi: 10.18637/jss.v072.i09. \cr
 }
 \seealso{
 \code{\link{eba}}, \code{\link{hist.eba}}, \code{\link{print.eba}}

@@ -120,7 +120,7 @@ Leamer, Edward E. (1985). Sensitivity Analysis Would Help. \emph{American Econom
 
 Levine, Ross, and David Renelt. (1992). A Sensitivity Analysis of Cross-Country Growth Regressions. \emph{American Economic Review}, 82(4), 942-963.
 
-Sala-i-Martin, Xavier. (1997). I Just Ran Two Million Regressions. \emph{American Economic Review}, 87(2), 178-183.
+Sala-i-Martin, Xavier. (1997). I Just Ran Two Million Regressions. \emph{American Economic Review}, 87(2), 178-183. doi:10.3386/w6252.
 }
 \author{
 %%  ~~who you are~~
@@ -128,8 +128,7 @@ Marek Hlavac   < hlavac at fas.harvard.edu > \cr
 Harvard University, Political Economy and Government \cr
 }
 \section{Please cite as:}{
-Hlavac, Marek (2015). ExtremeBounds: Extreme Bounds Analysis in R.\cr
-R package version 0.1.5.1. http://CRAN.R-project.org/package=ExtremeBounds 
+Hlavac, Marek (2016). ExtremeBounds: Extreme Bounds Analysis in R. \emph{Journal of Statistical Software}, 72(9), 1-22. doi: 10.18637/jss.v072.i09. \cr
 }
 \seealso{
 \code{\link{hist.eba}}, \code{\link{print.eba}}

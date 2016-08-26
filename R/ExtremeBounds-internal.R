@@ -10,8 +10,8 @@
 .onAttach <- 
 function(libname, pkgname) {
   packageStartupMessage("\nPlease cite as: \n")
-  packageStartupMessage(" Hlavac, Marek (2015). ExtremeBounds: Extreme Bounds Analysis in R.")
-  packageStartupMessage(" R package version 0.1.5.1. http://CRAN.R-project.org/package=ExtremeBounds \n")
+  packageStartupMessage(" Hlavac, Marek (2016). ExtremeBounds: Extreme Bounds Analysis in R.")
+  packageStartupMessage(" Journal of Statistical Software, 72(9), 1-22. doi:10.18637/jss.v072.i09. \n")
 }
 
 

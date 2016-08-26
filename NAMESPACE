@@ -1,5 +1,12 @@
 exportPattern("^[^\\.]")
-import(Formula, graphics, methods, stats, utils)
+import(Formula)
 S3method(hist, eba)
 S3method(print, eba)
 S3method(summary, eba)
+importFrom("graphics", "abline", "curve", "hist", "lines", "par",
+             "plot")
+  importFrom("methods", "is")
+  importFrom("stats", "as.formula", "density", "dnorm", "lm", "logLik",
+             "model.frame", "model.matrix", "pnorm", "qnorm", "quantile",
+             "sd", "weighted.mean")
+  importFrom("utils", "combn")

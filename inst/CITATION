@@ -1,13 +1,20 @@
-citHeader("Please cite stargazer in publications as:")
+bibentry(bibtype = "Article",
+  title        = "{ExtremeBounds}: Extreme Bounds Analysis in {R}",
+  author       = person(given = "Marek",
+                        family = "Hlavac",
+                        email = "hlavac@fas.harvard.edu"),
+  journal      = "Journal of Statistical Software",
+  year         = "2016",
+  volume       = "72",
+  number       = "9",
+  pages        = "1--22",
+  doi          = "10.18637/jss.v072.i09",
 
-citEntry(
-  entry="Manual",
-  title = "ExtremeBounds: Extreme Bounds Analysis in R",
-  author = as.person("Marek Hlavac"),
-  year = "2015",
-  note = "R package version 0.1.5.1",
-  organization = "Harvard University",
-  address = "Cambridge, USA",
-  textVersion = "Hlavac, Marek (2015). ExtremeBounds: Extreme Bounds Analysis in R. R package version 0.1.5.1. http://CRAN.R-project.org/package=ExtremeBounds",
-  url = "http://CRAN.R-project.org/package=ExtremeBounds"
+  header       = "To cite ExtremeBounds in publications use:",
+  textVersion  =
+  paste("Marek Hlavac (2016).",
+        "ExtremeBounds: Extreme Bounds Analysis in R.",
+        "Journal of Statistical Software, 72(9), 1-22.",
+        "doi:10.18637/jss.v072.i09")
 )
+
