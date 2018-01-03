@@ -48,8 +48,9 @@ An object of class \code{"hist.eba"} is a list containing the following componen
 }
 \author{
 %%  ~~who you are~~
-Marek Hlavac   < hlavac at fas.harvard.edu > \cr
-Harvard University, Political Economy and Government \cr
+Dr. Marek Hlavac < mhlavac at alumni.princeton.edu > \cr
+Department of Economics, UWC Adriatic, Duino, Italy \cr
+Research Fellow, Central European Labour Studies Institute (CELSI), Bratislava, Slovakia \cr
 }
 \section{Please cite as:}{
 Hlavac, Marek (2016). ExtremeBounds: Extreme Bounds Analysis in R. \emph{Journal of Statistical Software}, 72(9), 1-22. doi: 10.18637/jss.v072.i09. \cr

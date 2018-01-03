@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% almost as usual
-\author{Marek Hlavac\\Harvard University}
+\author{Marek Hlavac\\Department of Economics, UWC Adriatic, Duino (Trieste), Italy\\Central European Labour Studies Institute (CELSI), Bratislava, Slovakia}
 \title{\pkg{ExtremeBounds}: Extreme Bounds Analysis in \proglang{R}}
 
 %% for pretty printing and a nice hypersummary also set:
@@ -34,13 +34,13 @@ This article introduces the \proglang{R} package \pkg{ExtremeBounds} to perform 
 %% The address of (at least) one author should be given
 %% in the following format:
 \Address{
-  Marek Hlavac\\
-  Harvard University\\
-  John F. Kennedy School of Government\\
-  79 John F. Kennedy Street\\
-  Cambridge, MA 02138\\  
-  United States of America\\
-  E-mail: \email{hlavac@fas.harvard.edu}\\
+  Dr. Marek Hlavac\\
+  UWC Adriatic\\
+  via Trieste 29\\
+  Duino-Aurisina (TS), 34011\\
+  Italy\\
+  \\
+  E-mail: \email{mhlavac@alumni.princeton.edu}\\
 }
 %% It is also possible to add a telephone and fax number
 %% before the e-mail in the following format:
@@ -56,6 +56,12 @@ This article introduces the \proglang{R} package \pkg{ExtremeBounds} to perform 
 
 
 \begin{document}
+If you use the \pkg{ExtremeBounds} package in your research, please do not forget to include a citation:
+
+\begin{itemize}
+\item Hlavac, Marek (2016). ExtremeBounds: Extreme Bounds Analysis in R.
+\textit{Journal of Statistical Software}, \textbf{72}(9), 1-22. doi:10.18637/jss.v072.i09.
+\end{itemize}
 
 %% include your article here, just as usual
 %% Note that you should use the \pkg{}, \proglang{} and \code{} commands.
@@ -189,7 +195,7 @@ At the top of the text output, the \code{print()} method reproduces the \code{eb
 
 \end{itemize}
 
-\subsection[Histograms: Method hist]{Histograms: Method \code{hist}}
+\subsection[Histograms: Method hist()]{Histograms: Method \code{hist()}}
 
 In addition to providing text output with EBA results, the \pkg{ExtremeBounds} package can produce histograms that summarize the distribution of estimated regression coefficients graphically for each examined variable. These histograms can, furthermore, be superimposed with curves that depict the corresponding kernel density or a normally distributed approximation to the coefficient distribution. Such approximations can give the researcher a succinct summary of the shape of the coefficient distribution. As such, they provide a simple way of examining whether the estimated regression coefficients concentrate around a particular value or have, for instance, a multimodal distribution.
 
@@ -317,7 +323,7 @@ It is, moreover, evident that the blue kernel density curve and the green normal
 	\label{SophisticatedHist}
 \end{figure}
 
-In addition to histograms, \pkg{ExtremeBounds} allows users to examine EBA results through the text output produced by the \code{print()} method. This method produces a wealth of detailed information about the estimation results from both Leamer's and Sala-i-Martin's extreme bounds analysis. In the interest of clarity, I reproduce only the portions of \code{print()} output that are most relevant to my empirical example. \pkg{ExtremeBound} users can type \code{?print.eba} in the \proglang{R} console to obtain a complete description of the text output. 
+In addition to histograms, \pkg{ExtremeBounds} allows users to examine EBA results through the text output produced by the \code{print()} method. This method produces a wealth of detailed information about the estimation results from both Leamer's and Sala-i-Martin's extreme bounds analysis. In the interest of clarity, I reproduce only the portions of \code{print()} output that are most relevant to my empirical example. \pkg{ExtremeBounds} users can type \code{?print.eba} in the \proglang{R} console to obtain a complete description of the text output. 
 
 I obtain a text summary of my analysis results by passing the \code{"eba"}-class object to the \code{print()} method:
 \begin{CodeInput}

@@ -9,7 +9,7 @@
 
 .onAttach <- 
 function(libname, pkgname) {
-  packageStartupMessage("\nPlease cite as: \n")
+  packageStartupMessage("\nThis is ExtremeBounds v. 0.1.6. Please cite as: \n")
   packageStartupMessage(" Hlavac, Marek (2016). ExtremeBounds: Extreme Bounds Analysis in R.")
   packageStartupMessage(" Journal of Statistical Software, 72(9), 1-22. doi:10.18637/jss.v072.i09. \n")
 }
@@ -386,6 +386,7 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
     reg.formula <- list()
     beta <- se <- var <- t <- p <- ci.lower <- ci.upper <- vif <- nobs <- formula <- vif.satisfied <- include <- weight <- cdf.mu.generic <- matrix(NA, ncol=how.many.vars.labels, nrow=how.many.combinations)
     colnames(beta) <- colnames(se) <- colnames(var) <- colnames(t) <- colnames(p) <- colnames(ci.lower) <- colnames(ci.upper) <- colnames(vif) <- colnames(formula) <- colnames(vif.satisfied) <- colnames(include) <- colnames(weight) <- colnames(cdf.mu.generic) <- vars.labels
+    nomit <- 0
     
     # run all regressions
     message("\nEstimating regressions (3/4):")
@@ -400,73 +401,91 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
       combinations.trim <- combinations[r,][!is.na(combinations[r,])]
       reg.formula[[r]] <- create.formula(y, c(x, combinations.trim))
       reg <- suppressMessages(do.call(reg.fun, list(formula=reg.formula[[r]], data=data, ...))) # regression object
-      reg.summary <- summary(reg)        # regression summary object
+      reg.summary <- suppressWarnings(summary(reg))        # regression summary object
+      
+      nomit.increase <- FALSE
       
       for (i in 1:how.many.vars.labels) {
         
         variable.label <- vars.labels[i]
         variable.mu <- vars.mu[i]
         
-        if (variable.label %in% names(reg$coefficients)) {
-          beta[r,i] <- reg.summary$coefficients[variable.label, 1]
-          
-          # adjust standard errors, if se.fun is non-NULL
-          if (is.null(se.fun)) {
-            se[r,i]  <- reg.summary$coefficients[variable.label, 2]
-          }
-          else if (is.function(se.fun)) { # user-given function for weights
-            se.out <- suppressMessages(do.call(se.fun, list(reg)))
-            se[r,i] <- se.out[variable.label]
-          }
-          else {
-            se[r,i] <- NA
-          }
-          
-          # variance is just the square of the standard error
-          if (!is.na(se[r,i])) { var[r,i] <- (se[r,i])^2 } 
-          else { var[r,i] <- NA }
-          
-          t[r,i]  <- reg.summary$coefficients[variable.label, 3]
-          p[r,i]  <- reg.summary$coefficients[variable.label, 4]
-          
-          ci.temp <- suppressMessages(.confidence.interval(beta[r,i], se[r,i], level=level))
-          ci.lower[r,i] <- ci.temp[variable.label,"ci.lower"]
-          ci.upper[r,i] <- ci.temp[variable.label,"ci.upper"]
-          
-          vif[r,i] <- calculate.vif(reg)[variable.label] 
-          nobs[r,i] <- length(reg$residuals)
-          
-          formula[r,i] <- Reduce(paste, deparse(reg.formula[[r]], width.cutoff = 500))
-          
-          # weights
-          if (is.null(weights)) { weight[r,i] <- 1 }
-          else if (is.function(weights)) { # user-given function for weights
-            weight[r,i] <- suppressMessages(do.call(weights, list(reg)))
-          }
-          else {
-            if (weights == "lri") { weight[r,i] <- weights.lri(reg, reg.fun, ...) }
-            else if (weights == "r.squared") { weight[r,i] <- weights.r.squared(reg) }
-            else if (weights == "adj.r.squared") { weight[r,i] <- weights.adj.r.squared(reg) }
-            else { weight[r,i] <- NA }
-          }
-          
-          # Sala-i-Martin, without assumption that betas are normally distributed across models 
-          # get CDF(mu) for each model
-          cdf.mu.generic[r,i] <- pnorm(variable.mu, mean = beta[r,i], sd = se[r,i], lower.tail=TRUE, log.p=FALSE)
-          
-          if (!is.null(vif.max)) { vif.satisfied[r,i] <- (vif[r,i] <= vif.max) }
-          else { vif.satisfied[r,i] <- TRUE }
-          
-          if (!is.null(include.fun)) { include[r,i] <- as.logical(suppressMessages(do.call(include.fun, list(reg)))) }
-          else { include[r,i] <- TRUE }
-        }
+        if (identical(names(reg$coefficients),rownames(reg.summary$coefficients))) {
         
+          if (variable.label %in% names(reg$coefficients)) {
+            beta[r,i] <- reg.summary$coefficients[variable.label, 1]
+          
+            # adjust standard errors, if se.fun is non-NULL
+            if (is.null(se.fun)) {
+              se[r,i]  <- reg.summary$coefficients[variable.label, 2]
+            }
+            else if (is.function(se.fun)) { # user-given function for weights
+              se.out <- suppressMessages(do.call(se.fun, list(reg)))
+              se[r,i] <- se.out[variable.label]
+            }
+            else {
+              se[r,i] <- NA
+            }
+          
+            # variance is just the square of the standard error
+            if (!is.na(se[r,i])) { var[r,i] <- (se[r,i])^2 } 
+            else { var[r,i] <- NA }
+          
+            t[r,i]  <- reg.summary$coefficients[variable.label, 3]
+            p[r,i]  <- reg.summary$coefficients[variable.label, 4]
+          
+            ci.temp <- suppressMessages(.confidence.interval(beta[r,i], se[r,i], level=level))
+            ci.lower[r,i] <- ci.temp[variable.label,"ci.lower"]
+            ci.upper[r,i] <- ci.temp[variable.label,"ci.upper"]
+          
+            vif[r,i] <- calculate.vif(reg)[variable.label] 
+            nobs[r,i] <- length(reg$residuals)
+            
+            formula[r,i] <- Reduce(paste, deparse(reg.formula[[r]], width.cutoff = 500))
+          
+            # weights
+            if (is.null(weights)) { weight[r,i] <- 1 }
+            else if (is.function(weights)) { # user-given function for weights
+              weight[r,i] <- suppressMessages(do.call(weights, list(reg)))
+            }
+            else {
+              if (weights == "lri") { weight[r,i] <- weights.lri(reg, reg.fun, ...) }
+              else if (weights == "r.squared") { weight[r,i] <- weights.r.squared(reg) }
+              else if (weights == "adj.r.squared") { weight[r,i] <- weights.adj.r.squared(reg) }
+              else { weight[r,i] <- NA }
+            }
+          
+            # Sala-i-Martin, without assumption that betas are normally distributed across models 
+            # get CDF(mu) for each model
+            cdf.mu.generic[r,i] <- pnorm(variable.mu, mean = beta[r,i], sd = se[r,i], lower.tail=TRUE, log.p=FALSE)
+          
+            if (!is.null(vif.max)) { vif.satisfied[r,i] <- (vif[r,i] <= vif.max) }
+            else { vif.satisfied[r,i] <- TRUE }
+          
+            if (!is.null(include.fun)) { include[r,i] <- as.logical(suppressMessages(do.call(include.fun, list(reg)))) }
+            else { include[r,i] <- TRUE }
+          
+            
+            }
+        }
+        else {
+          formula[r,i] <- Reduce(paste, deparse(reg.formula[[r]], width.cutoff = 500))
+          include[r,i] <- NA      # if omitted from the regression then automatically not included
+          nomit.increase <- TRUE    # omitted due to multicollinearity (or otherwise dropping coefficient)
+        }
+
       }
+      
+      if (nomit.increase) { nomit <- nomit + 1 }
       
     }
     
-    out <- list(beta, se, var, t, p, ci.lower, ci.upper, nobs, vif, vif.satisfied, formula, weight, cdf.mu.generic, include)
-    names(out) <- c("beta","se","var","t","p","ci.lower","ci.upper", "nobs", "vif", "vif.satisfied", "formula", "weight", "cdf.mu.generic", "include")
+    if (nomit > 0) {
+      message("\nNote: ", nomit, " regressions omitted from the analysis. (This typically happens due to perfect multicollinearity.)")
+    }
+    
+    out <- list(beta, se, var, t, p, ci.lower, ci.upper, nobs, vif, vif.satisfied, formula, weight, cdf.mu.generic, include, nomit)
+    names(out) <- c("beta","se","var","t","p","ci.lower","ci.upper", "nobs", "vif", "vif.satisfied", "formula", "weight", "cdf.mu.generic", "include", "nomit")
     return(out)
   }
   
@@ -513,7 +532,7 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
     points <- c("cdf.generic.unweighted","cdf.generic.weighted", "min", "max", "mean","weighted.mean","median","median.lower", "median.higher", "min.ci.lower", "max.ci.upper")
     how.many.points <- length(points)
     
-    type <- beta <- se <- var <- t <- p <- ci.lower <- ci.upper <- vif <- nobs <- formula <- weight <- cdf.mu.generic <- matrix(NA, nrow=how.many.vars.labels, ncol=how.many.points)
+    type <- beta <- se <- var <- t <- p <- ci.lower <- ci.upper <- vif <- nobs <- formula <- omit <- weight <- cdf.mu.generic <- matrix(NA, nrow=how.many.vars.labels, ncol=how.many.points)
     beta.significant <- beta.below.mu <- beta.above.mu  <- beta.significant.below.mu <- beta.significant.above.mu <- nreg.variable <- ncoef.variable <- rep(NA, times=how.many.vars.labels)
     
     rownames(type) <- rownames(beta) <- rownames(se) <- rownames(var) <- rownames(t) <- rownames(p) <- rownames(ci.lower) <- rownames(ci.upper) <- rownames(vif) <- rownames(nobs) <- rownames(formula) <- rownames(weight) <- rownames(cdf.mu.generic) <- vars.labels
@@ -707,11 +726,11 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
                         "cdf.mu.normal", "cdf.above.mu.normal",
                         "cdf.mu.generic","cdf.above.mu.generic")]
     
-    # number of regressions estimated overall
-    nreg <- nrow(r$beta)
-        
+    # number of regressions estimated overall  (minus those that are omitted)
+    nreg <- nrow(r$beta) - r$nomit
+
     out <- list(bounds, cl, coef, vars.mu, level, ncomb, nreg, nreg.variable, ncoef.variable, r)
-    names(out) <- c("bounds","call","coefficients","mu","level","ncomb","nreg","nreg.variable","ncoef.variable","regressions")
+    names(out) <- c("bounds","call","coefficients","mu","level","ncomb", "nreg","nreg.variable","ncoef.variable","regressions")
     class(out) <- "eba"
     
     message("Done.")

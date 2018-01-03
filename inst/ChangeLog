@@ -1,7 +1,11 @@
 ExtremeBounds: Extreme Bounds Analysis in R - What's new?
 
 Please note that I am always looking for comments and suggestions. 
-Do not hesitate to contact me at hlavac [at] fas.harvard.edu
+Do not hesitate to contact me at mhlavac [at] alumni.princeton.edu
+
+v. 0.1.6:
+- the package will now complete the analysis even in the presence of perfect multicollinearity (it will simply omit the corresponding regression result from its analysis); this change prevents the package from stopping with an error when this issue occurs
+- updated author information
 
 v. 0.1.5.2:
 - updated citation information

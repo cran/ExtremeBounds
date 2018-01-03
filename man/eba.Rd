@@ -109,7 +109,8 @@ An object of class \code{"eba"} is a list containing the following components:
     \item \code{formula}: a character string containing the model formula, a symbolic description of the model that was fitted.
     \item \code{weight}: a numerical value that represents the weight that is given to a particular regression model in the extreme bounds analysis.
     \item \code{cdf.mu.generic}: the value of cumulative distribution function of the regression coefficients at the value of \code{mu}. The coefficients are assumed to be distributed normally with a mean given by the regression model's coefficient estimate and with a standard deviation given by the estimated standard error. This value is used in estimating the generic version of Sala-i-Martin's EBA.
-    \item \code{include}: a logical value (TRUE or FALSE) that indicates whether the corresponding model's estimation results are included in the extreme bounds analysis (based on the argument \code{include.fun}).
+    \item \code{include}: a logical value (TRUE or FALSE) that indicates whether the corresponding model's estimation results are included in the extreme bounds analysis (based on the argument \code{include.fun}). A value of \code{NA} that the corresponding regression-variable combination is not included in the analysis (either not part of the variable combination, or omitted due to multicollinearity).
+    \item \code{nomit}: number of regressions that have been omitted from the analysis, typically due to perfect multicollinearity. They can be found by looking for the regressions in which all \code{beta} values are equal to \code{NA}.
     }
   }
 }
@@ -124,8 +125,9 @@ Sala-i-Martin, Xavier. (1997). I Just Ran Two Million Regressions. \emph{America
 }
 \author{
 %%  ~~who you are~~
-Marek Hlavac   < hlavac at fas.harvard.edu > \cr
-Harvard University, Political Economy and Government \cr
+Dr. Marek Hlavac < mhlavac at alumni.princeton.edu > \cr
+Department of Economics, UWC Adriatic, Duino, Italy \cr
+Research Fellow, Central European Labour Studies Institute (CELSI), Bratislava, Slovakia \cr
 }
 \section{Please cite as:}{
 Hlavac, Marek (2016). ExtremeBounds: Extreme Bounds Analysis in R. \emph{Journal of Statistical Software}, 72(9), 1-22. doi: 10.18637/jss.v072.i09. \cr
