@@ -6,7 +6,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% almost as usual
-\author{Marek Hlavac\\Department of Economics, UWC Adriatic, Duino (Trieste), Italy\\Central European Labour Studies Institute (CELSI), Bratislava, Slovakia}
+\author{Marek Hlavac\\Central European Labour Studies Institute (CELSI), Bratislava, Slovakia}
 \title{\pkg{ExtremeBounds}: Extreme Bounds Analysis in \proglang{R}}
 
 %% for pretty printing and a nice hypersummary also set:
@@ -34,11 +34,11 @@ This article introduces the \proglang{R} package \pkg{ExtremeBounds} to perform 
 %% The address of (at least) one author should be given
 %% in the following format:
 \Address{
-  Dr. Marek Hlavac\\
-  UWC Adriatic\\
-  via Trieste 29\\
-  Duino-Aurisina (TS), 34011\\
-  Italy\\
+  Marek Hlavac\\
+  Central European Labour Studies Institute (CELSI)\\
+  Zvolenska ul. 29\\
+  Bratislava, 821 09\\
+  Slovakia\\
   \\
   E-mail: \email{mhlavac@alumni.princeton.edu}\\
 }

@@ -16,7 +16,7 @@ hist.eba <- function(x, variables=NULL, col="gray", freq=FALSE, main=NULL,
                      mu.show=TRUE, mu.col="red", mu.lwd=2, mu.visible=TRUE,
                      density.show=TRUE, density.col="blue", density.lwd=2, density.args=NULL, 
                      normal.show=FALSE, normal.col="darkgreen", normal.lwd=2, normal.weighted=FALSE, 
-                     xlim=NULL, ylim=NULL, ...) {
+                     xlim=NULL, ylim=NULL, ...) {             
   
   cl <- match.call()
   
@@ -41,3 +41,4 @@ summary.eba <- function(object, ...) {
 coefficients.eba <- function(object, ...) {
   return(object$coefficients)
 }
+

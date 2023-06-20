@@ -3,6 +3,11 @@ ExtremeBounds: Extreme Bounds Analysis in R - What's new?
 Please note that I am always looking for comments and suggestions. 
 Do not hesitate to contact me at mhlavac [at] alumni.princeton.edu
 
+v. 0.1.7:
+- MUCH faster calculation as a result of removing VIF checking even when VIF argument was not specified
+- corrected bug that could have caused problems with k = 0 (unusual case)
+- updated author information
+
 v. 0.1.6:
 - the package will now complete the analysis even in the presence of perfect multicollinearity (it will simply omit the corresponding regression result from its analysis); this change prevents the package from stopping with an error when this issue occurs
 - updated author information

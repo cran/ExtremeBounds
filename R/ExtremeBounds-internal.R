@@ -9,11 +9,20 @@
 
 .onAttach <- 
 function(libname, pkgname) {
-  packageStartupMessage("\nThis is ExtremeBounds v. 0.1.6. Please cite as: \n")
+  packageStartupMessage("\nThis is ExtremeBounds v. 0.1.7. Please cite as: \n")
   packageStartupMessage(" Hlavac, Marek (2016). ExtremeBounds: Extreme Bounds Analysis in R.")
   packageStartupMessage(" Journal of Statistical Software, 72(9), 1-22. doi:10.18637/jss.v072.i09. \n")
 }
 
+.is.NA <-
+  function(x) {
+    if (is.numeric(x)) {
+      return(!is.finite(x))
+    } 
+    else {
+      return(is.na(x))
+    }
+}
 
 .confidence.interval <-
 function(beta.vector, se.vector, level) {
@@ -56,7 +65,7 @@ function(string.vector) {
     }
       
     s <- gsub("[()]","",s,fixed=FALSE)
-    s <- s[is.na(suppressWarnings(as.numeric(s)))]
+    s <- s[.is.NA(suppressWarnings(as.numeric(s)))]
       
     out.vector <- c(out.vector, s)
   }
@@ -82,7 +91,7 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
   
   is.all.integers.at.least <-
   function(x,at.least) {
-    if (!is.na(match(NA,x))) { return(FALSE) }
+    if (!.is.NA(match(NA,x))) { return(FALSE) }
     if (is.all.integers(x)) {
       return(min(x)>=at.least)
     }
@@ -97,13 +106,13 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
     
     message("\nGenerating combinations (2/4): ", appendLF=FALSE)
     
-    max.k <- max(k)
-    out <- matrix(NA, ncol=max.k, nrow=0)
+    out.width <- max(k) + 1       
+    out <- matrix(NA, ncol=out.width, nrow=0)
     
     for (i in 1:length(k)) {
-      combinations <- t(combn(z, k[i], simplify=T))
+      combinations <- t(combn(z, k[i]+1, simplify=T))                                        
       
-      combinations.resized <- matrix(NA, ncol=max.k, nrow=nrow(combinations))
+      combinations.resized <- matrix(NA, ncol=out.width, nrow=nrow(combinations))           
       for (r in 1:nrow(combinations)) {
         for (c in 1:ncol(combinations)) {
           combinations.resized[r,c] <- combinations[r,c]
@@ -112,26 +121,26 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
     
       out <- rbind(out, combinations.resized)
     }
-    
+    out <- as.matrix(out)
     # only leave combinations that include the focus variable
-    out <- out[apply(out, 1, FUN=function(x) (!all(is.na(match(v,x))))),]  
+    out <- out[apply(out, 1, FUN=function(x) (!all(.is.NA(match(v,x))))), , drop = FALSE]
     
     # make sure that mutually exclusive variables are not included
     if (!is.null(exclusive)) {
       for (i in 1:length(exclusive)) {
-        out <- out[apply(out, 1, FUN=function(x) (length(match(exclusive[[i]], x)[!is.na(match(exclusive[[i]],x))]))<=1),]
+        out <- out[apply(out, 1, FUN=function(x) (length( match(exclusive[[i]], x)[!.is.NA(match(exclusive[[i]],x))] )<=1) ), , drop = FALSE]
       }
     }
-    
+
     if (is.null(nrow(out))) { out <- as.matrix(t(out)) }
     ncomb <- nrow(out)
-    
+
     # randomly sample the requested number of draws
     if (!is.null(draws)) {
       
       if (draws > ncomb) { draws <- ncomb }
       which.rows <- sample(1:ncomb, size=draws, replace=FALSE)
-      out <- out[which.rows,]
+      out <- out[which.rows, , drop = FALSE]
     }
     
     if (is.null(nrow(out))) { out <- as.matrix(t(out)) }
@@ -152,10 +161,10 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
     
   }
   
-  # returns highest value <= median, median itself, highest value >= median
+  # returns highest value <= median, median itself, lowest value >= median
   get.median <-
   function(x) {
-    x <- x[!is.na(x)] # remove NAs
+    x <- x[!.is.NA(x)] # remove NAs
     if (length(x) != 0) {
       median <- median(x)
       median.lower <- max(x[x<=median]) 
@@ -174,7 +183,7 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
   get.mean <-
   function(...) {
     value <- do.call(mean, list(...))
-    if (!is.nan(value)) { return(value) }
+    if (!.is.NA(value)) { return(value) }
     else { return(NA) }
   }
   
@@ -182,14 +191,14 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
   get.weighted.mean <-
   function(...) {
     value <- do.call(weighted.mean, list(...))
-    if (!is.nan(value)) { return(value) }
+    if (!.is.NA(value)) { return(value) }
     else { return(NA) }
   }
   
   # population standard deviation
   stdev <-
   function(x) {
-    if (length(x[!is.na(x)]) == 0) { return(NA) }
+    if (length(x[!.is.NA(x)]) == 0) { return(NA) }
     
     N <- length(x)
     stdev <- sqrt((N-1)/N) * sd(x, na.rm=TRUE)
@@ -206,7 +215,7 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
     out$name <- "1"
     out$label <- intercept.string
     out$type <- "free"
-    if (!is.na(mu[intercept.string])) { out$mu <- mu[intercept.string] }
+    if (!.is.NA(mu[intercept.string])) { out$mu <- mu[intercept.string] }
     else { out$mu <- mu.default }
     
     variable.source <- list(x, v)
@@ -227,7 +236,7 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
           out$type <- c(out$type, rep(variable.types[i], times = length(lab)))
           
           # user-given mu cutoffs
-          if (!is.na(mu[src[j]])) {
+          if (!.is.NA(mu[src[j]])) {
             out$mu <- c(out$mu, rep(mu[src[j]], times=length(lab)))
           }
           else {
@@ -237,7 +246,6 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
         }
       } 
     }
-    
     return(out)
   }
   
@@ -398,15 +406,13 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
                 as.character(round((r/how.many.combinations)*100,2)),"%)", sep=""))
       }
       
-      combinations.trim <- combinations[r,][!is.na(combinations[r,])]
+      combinations.trim <- combinations[r,][!.is.NA(combinations[r,])]
       reg.formula[[r]] <- create.formula(y, c(x, combinations.trim))
       reg <- suppressMessages(do.call(reg.fun, list(formula=reg.formula[[r]], data=data, ...))) # regression object
       reg.summary <- suppressWarnings(summary(reg))        # regression summary object
-      
       nomit.increase <- FALSE
       
       for (i in 1:how.many.vars.labels) {
-        
         variable.label <- vars.labels[i]
         variable.mu <- vars.mu[i]
         
@@ -414,8 +420,7 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
         
           if (variable.label %in% names(reg$coefficients)) {
             beta[r,i] <- reg.summary$coefficients[variable.label, 1]
-          
-            # adjust standard errors, if se.fun is non-NULL
+            # adjust standard errors, if se.fun is non-NULL      
             if (is.null(se.fun)) {
               se[r,i]  <- reg.summary$coefficients[variable.label, 2]
             }
@@ -426,9 +431,9 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
             else {
               se[r,i] <- NA
             }
-          
+            
             # variance is just the square of the standard error
-            if (!is.na(se[r,i])) { var[r,i] <- (se[r,i])^2 } 
+            if (!.is.NA(se[r,i])) { var[r,i] <- (se[r,i])^2 } 
             else { var[r,i] <- NA }
           
             t[r,i]  <- reg.summary$coefficients[variable.label, 3]
@@ -438,11 +443,11 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
             ci.lower[r,i] <- ci.temp[variable.label,"ci.lower"]
             ci.upper[r,i] <- ci.temp[variable.label,"ci.upper"]
           
-            vif[r,i] <- calculate.vif(reg)[variable.label] 
+            if (!is.null(vif.max)) { vif[r,i] <- calculate.vif(reg)[variable.label] }
             nobs[r,i] <- length(reg$residuals)
             
-            formula[r,i] <- Reduce(paste, deparse(reg.formula[[r]], width.cutoff = 500))
-          
+            # formula[r,i] <- Reduce(paste, deparse(reg.formula[[r]], width.cutoff = 500))
+
             # weights
             if (is.null(weights)) { weight[r,i] <- 1 }
             else if (is.function(weights)) { # user-given function for weights
@@ -502,20 +507,23 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
   
     
     bounds.base$type <- vars.types
-    bounds.base$mu <- vars.mu
+    mu <- bounds.base$mu <- vars.mu
     
     # Leamer Analysis
-    bounds.base$leamer.lower <- coef[["min.ci.lower"]]$ci.lower
-    bounds.base$leamer.upper <- coef[["max.ci.upper"]]$ci.upper
-    bounds.base$leamer.robust <- as.logical(( ((bounds.base$leamer.lower-bounds.base$mu) * (bounds.base$leamer.upper - bounds.base$mu)) > 0)) 
+    lb <- bounds.base$leamer.lower <- coef[["min.ci.lower"]]$ci.lower
+    ub <- bounds.base$leamer.upper <- coef[["max.ci.upper"]]$ci.upper
+    
+    robustness.leamer <- as.logical( !((lb <= mu) & (ub >= mu)) )
+    
+    bounds.base$leamer.robust <- robustness.leamer
     
     ### Sala-i-Martin analysis
     
     # assuming betas are normally distributed across models
-    mu.normal <- coef[["weighted.mean"]]$beta
-    sigma.normal <- sqrt(coef[["weighted.mean"]]$var)  # standard deviation based on weighted mean of *variances*
+    mean.normal <- coef[["weighted.mean"]]$beta
+    sd.normal <- sqrt(coef[["weighted.mean"]]$var)  # standard deviation based on weighted mean of *variances*
     
-    bounds.base$cdf.mu.normal <- pnorm(bounds.base$mu, mean=mu.normal, sd=sigma.normal, lower.tail=TRUE, log.p=FALSE)
+    bounds.base$cdf.mu.normal <- pnorm(bounds.base$mu, mean=mean.normal, sd=sd.normal, lower.tail=TRUE, log.p=FALSE)
     bounds.base$cdf.above.mu.normal <- 1 - bounds.base$cdf.mu.normal
     
     return(bounds.base)
@@ -543,7 +551,6 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
     
     message("\nCalculating bounds (4/4): ", appendLF=FALSE)
     for (j in 1:how.many.points) {
-      
       pt <- points[j]
       
       for (i in 1:how.many.vars.labels){
@@ -558,6 +565,7 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
         r.unadj <- r[[stat.names[1]]][,i]
         
         for (q in 1:length(stat.names)) {
+          
           replaced <- stat.names[q]
           
           # check for vif and intercept (no VIF exists for intercept) + check for include.fun
@@ -576,25 +584,25 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
         # get some info for Sala-i-Martin's EBA
         # - only one run necessary (hence j==1)
         if (j==1) {
-          num.regs <- length(r.unadj[!is.na(r.unadj)])
-          total.length <- length(r.adj$beta[!is.na(r.adj$beta)])
+          num.regs <- length(r.unadj[!.is.NA(r.unadj)])
+          total.length <- length(r.adj$beta[!.is.NA(r.adj$beta)])
           
-          number.not.significant <- length( r.adj$beta[(r.adj$ci.lower <= variable.mu) & (r.adj$ci.upper >= variable.mu) & (!is.na(r.adj$beta))] )
+          number.not.significant <- length( r.adj$beta[(r.adj$ci.lower <= variable.mu) & (r.adj$ci.upper >= variable.mu) & (!.is.NA(r.adj$beta))] )
           beta.significant[i] <- (total.length - number.not.significant)/total.length
           
-          if (is.nan(beta.significant[i])) { beta.significant[i] <- NA }
+          if (.is.NA(beta.significant[i])) { beta.significant[i] <- NA }
           
-          beta.below.mu[i] <- length(r.adj$beta[(r.adj$beta < variable.mu) & (!is.na(r.adj$beta))]) / total.length
-          beta.above.mu[i] <- length(r.adj$beta[(r.adj$beta > variable.mu) & (!is.na(r.adj$beta))]) / total.length
+          beta.below.mu[i] <- length(r.adj$beta[(r.adj$beta < variable.mu) & (!.is.NA(r.adj$beta))]) / total.length
+          beta.above.mu[i] <- length(r.adj$beta[(r.adj$beta > variable.mu) & (!.is.NA(r.adj$beta))]) / total.length
           
-          if (is.nan(beta.below.mu[i])) { beta.below.mu[i] <- NA }
-          if (is.nan(beta.above.mu[i])) { beta.above.mu[i] <- NA }
+          if (.is.NA(beta.below.mu[i])) { beta.below.mu[i] <- NA }
+          if (.is.NA(beta.above.mu[i])) { beta.above.mu[i] <- NA }
           
-          beta.significant.below.mu[i] <- length(r.adj$beta[(r.adj$beta < variable.mu) & (r.adj$ci.upper < variable.mu) & (!is.na(r.adj$beta))]) / total.length
-          beta.significant.above.mu[i] <- length(r.adj$beta[(r.adj$beta > variable.mu) & (r.adj$ci.lower > variable.mu) & (!is.na(r.adj$beta))]) / total.length
+          beta.significant.below.mu[i] <- length(r.adj$beta[(r.adj$beta < variable.mu) & (r.adj$ci.upper < variable.mu) & (!.is.NA(r.adj$beta))]) / total.length
+          beta.significant.above.mu[i] <- length(r.adj$beta[(r.adj$beta > variable.mu) & (r.adj$ci.lower > variable.mu) & (!.is.NA(r.adj$beta))]) / total.length
           
-          if (is.nan(beta.significant.below.mu[i])) { beta.significant.below.mu[i] <- NA }
-          if (is.nan(beta.significant.above.mu[i])) { beta.significant.above.mu[i] <- NA }
+          if (.is.NA(beta.significant.below.mu[i])) { beta.significant.below.mu[i] <- NA }
+          if (.is.NA(beta.significant.above.mu[i])) { beta.significant.above.mu[i] <- NA }
           
           nreg.variable[i] <- num.regs
           ncoef.variable[i] <- total.length
@@ -667,7 +675,6 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
         }
       }
     
-      
       # create data frame
       if (!(pt %in% c("mean","weighted.mean","cdf.generic.unweighted","cdf.generic.weighted"))) { 
         frame <- as.data.frame(matrix(NA,nrow=how.many.vars.labels, ncol=length(stat.names)))
@@ -681,6 +688,7 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
         frame <- as.data.frame(matrix(NA,nrow=how.many.vars.labels, ncol=3))
         names(frame) <- c("type","cdf.mu.generic", "cdf.above.mu.generic")
       }
+ 
       rownames(frame) <- vars.labels
       
       frame$type <- type[,pt]
@@ -946,9 +954,6 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
   
   message("ExtremeBounds: eba() performing analysis. Please wait.")
   
-  # add 1 to k, because of the way the combination calculation is set up
-  k <- k + 1
-  
   # run things
   message("\nPreparing variables (1/4): ", appendLF=FALSE)
   lab <- variable.labels(y, focus, free, mu, mu.default, data)
@@ -998,7 +1003,7 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
   error.msg <- NULL
   if (!is.object(x)) { error.msg <- c(error.msg, "Argument 'x' must be an object of class \"eba\".\n")}
   else {
-    if (class(x)!="eba") { error.msg <- c(error.msg, "Argument 'x' must be an object of class \"eba\".\n")}
+    if (!("eba" %in% class(x))) { error.msg <- c(error.msg, "Argument 'x' must be an object of class \"eba\".\n")}
   }
   
   if ((!is.character(variables)) && (!is.null(variables))) { error.msg <- c(error.msg,"Argument 'variables' must be NULL or a vector of character strings that contains variable names.\n")}
@@ -1057,16 +1062,16 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
     var.label <- variables[i]
     print.var.label <- var.label
     if (!is.null(main)) {
-      if (!is.na(main[var.label])) { print.var.label <- main[var.label] }
+      if (!.is.NA(main[var.label])) { print.var.label <- main[var.label] }
     }
       
     which.rows <- as.logical((x$regressions$vif.satisfied[,var.label]) & (x$regressions$include[,var.label]))
     x.values <- x$regressions$beta[which.rows,var.label]
-    x.values <- x.values[!is.na(x.values)]
+    x.values <- x.values[!.is.NA(x.values)]
     
     mu.value <- x$mu[var.label]
     
-    if (length(x.values[!is.na(x.values)]) == 0) { # in case there is nothing to plot
+    if (length(x.values[!.is.NA(x.values)]) == 0) { # in case there is nothing to plot
       histograms[[var.label]] <- h <- NULL
       names(plot(1, type="n", axes=F, xlab="", ylab="", main=print.var.label))
     }
@@ -1144,7 +1149,7 @@ function(formula, data, y, free, doubtful, focus, k, mu, level, vif, exclusive, 
   error.msg <- NULL
   if (!is.object(x)) { error.msg <- c(error.msg, "Argument 'x' must be an object of class \"eba\".\n")}
   else {
-    if (class(x)!="eba") { error.msg <- c(error.msg, "Argument 'x' must be an object of class \"eba\".\n")}
+    if (!("eba" %in% class(x))) { error.msg <- c(error.msg, "Argument 'x' must be an object of class \"eba\".\n")}
   }
   
   if (!is.numeric(digits)) { error.msg <- c(error.msg, "Argument 'digits' must be of type 'numeric'.\n")}   

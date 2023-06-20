@@ -125,8 +125,7 @@ Sala-i-Martin, Xavier. (1997). I Just Ran Two Million Regressions. \emph{America
 }
 \author{
 %%  ~~who you are~~
-Dr. Marek Hlavac < mhlavac at alumni.princeton.edu > \cr
-Department of Economics, UWC Adriatic, Duino, Italy \cr
+Marek Hlavac < mhlavac at alumni.princeton.edu > \cr
 Research Fellow, Central European Labour Studies Institute (CELSI), Bratislava, Slovakia \cr
 }
 \section{Please cite as:}{
